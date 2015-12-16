@@ -11,6 +11,11 @@ var userSchema = new Schema({
     userAgent : {
         type : String,
         required : true
+    },
+    locations : {
+        type : [Schema.Types.ObjectId],
+        ref : 'Location',
+        default : []
     }
 });
 
