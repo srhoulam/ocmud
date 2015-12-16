@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 var selfRefPlugin = require('mongoose-selfreference');
+var randomPlugin = require('mongoose-random');
 var Schema = mongoose.Schema;
 
 var locationSchema = new Schema({
@@ -30,5 +31,7 @@ var locationSchema = new Schema({
 locationSchema.plugin(selfRefPlugin, {
     keys : ['n', 'e', 'w', 's']
 });
+
+locationSchema.plugin(randomPlugin);
 
 module.exports = locationSchema;
