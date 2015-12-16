@@ -1,7 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var selfRefPlugin = require('mongoose-selfref');
+var selfRefPlugin = require('mongoose-selfreference');
 var Schema = mongoose.Schema;
 
 var locationSchema = new Schema({
