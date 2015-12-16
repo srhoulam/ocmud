@@ -1,0 +1,25 @@
+{
+  "name": "ocmud",
+  "version": "1.0.0",
+  "description": "openly-creatable multi-user dungeon",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srhoulam/ocmud.git"
+  },
+  "author": "Saad Rhoulam",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/srhoulam/ocmud/issues"
+  },
+  "homepage": "https://github.com/srhoulam/ocmud#readme",
+  "dependencies": {
+    "dotenv": "^1.2.0",
+    "mongoose": "^4.3.1",
+    "mongoose-random": "^0.1.1",
+    "mongoose-selfreference": "^1.0.0"
+  }
+}
