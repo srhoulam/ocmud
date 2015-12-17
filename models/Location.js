@@ -43,7 +43,9 @@ function attacherFactory(attachDirection) {
 
     return function(doc) {
         // source and target locations are not already bound in the relevant directions
-        if(doc[oppositeDirection] === doc._id && this[attachDirection] === this._id) {
+        var unbound = doc[oppositeDirection].toString() === doc._id.toString() &&
+            this[attachDirection].toString() === this._id.toString();
+        if(unbound) {
             doc[oppositeDirection] = this._id;
             this[attachDirection] = doc._id;
 
