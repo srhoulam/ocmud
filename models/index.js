@@ -5,6 +5,8 @@ var path = require('path');
 var mongoose = require('mongoose');
 process.env.MONGO_URI || require('dotenv').load();
 
+mongoose.Promise = Promise;
+
 fs.readdirSync(__dirname).forEach(function(file) {
     if(file === 'index.js') {
         return;
