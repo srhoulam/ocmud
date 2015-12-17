@@ -20,6 +20,7 @@
     "dotenv": "^1.2.0",
     "mongoose": "^4.3.1",
     "mongoose-random": "^0.1.1",
-    "mongoose-selfreference": "^1.0.0"
+    "mongoose-selfreference": "^1.0.0",
+    "socket.io": "^1.3.7"
   }
 }
