@@ -34,4 +34,29 @@ locationSchema.plugin(selfRefPlugin, {
 
 locationSchema.plugin(randomPlugin);
 
+var directionList = ['n', 'e', 's', 'w'];
+
+function attacherFactory(attachDirection) {
+    var oppositeDirection = directionList[
+        (directionList.indexOf(attachDirection) + 2) % directionList.length
+    ];
+
+    return function(doc) {
+        // source and target locations are not already bound in the relevant directions
+        if(doc[oppositeDirection] === doc._id && this[attachDirection] === this._id) {
+            doc[oppositeDirection] = this._id;
+            this[attachDirection] = doc._id;
+
+            return Promise.all([this.save(), doc.save()]);
+        } else {
+            throw new RangeError("Location: direction is already bound");
+        }
+    };
+}
+
+locationSchema.methods.attachNorth = attacherFactory('n');
+locationSchema.methods.attachSouth = attacherFactory('s');
+locationSchema.methods.attachEast = attacherFactory('e');
+locationSchema.methods.attachWest = attacherFactory('w');
+
 module.exports = locationSchema;
