@@ -4,7 +4,8 @@
   "description": "openly-creatable multi-user dungeon",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine",
+    "start": "node bin/www"
   },
   "repository": {
     "type": "git",
