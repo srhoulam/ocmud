@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/srhoulam/ocmud#readme",
   "dependencies": {
+    "bcrypt": "^0.8.5",
     "body-parser": "^1.14.2",
     "connect-mongo": "^1.0.2",
     "debug": "^2.2.0",
@@ -27,6 +28,7 @@
     "mongoose": "^4.3.1",
     "mongoose-random": "^0.1.1",
     "mongoose-selfreference": "^1.0.0",
+    "mongoose-unique-validator": "^0.6.2",
     "morgan": "^1.6.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
