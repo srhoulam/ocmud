@@ -13,6 +13,14 @@ var routes = require('./routes/index');
 
 var app = express();
 
+/** DOC
+ *
+ *  The purpose of the express portion of this application
+ *    is for all authenticated requests. This will be the
+ *    "create" mode on the front-end.
+ *
+ */
+
 // ensure environment variables are loaded
 process.env.SESSION_SECRET || require('dotenv').load();
 
