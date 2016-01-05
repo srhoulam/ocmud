@@ -1,6 +1,7 @@
 'use strict';
 
 var bcrypt = require('bcrypt');
+var validator = require('validator');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var uniqueValidator = require('mongoose-unique-validator');
@@ -11,6 +12,20 @@ var userSchema = new Schema({
         required : true,
         unique : true
     },
+/*    email : {
+        type : String,
+        required : true,
+        validate : [validator.isEmail, "Email fails syntax validation."]
+    },
+    emailConfirmed : {
+        type : Boolean,
+        default : false
+    },
+    confirmCode : {
+        type : String
+        // does `default` attr accept functions?
+        // spin confirmation code generation off into a module in ../lib
+    },*/
     digest : String,
     // phone : String, // for twilio integration
     locations : {
