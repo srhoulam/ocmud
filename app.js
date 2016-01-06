@@ -9,9 +9,6 @@ var db = require('./models');
 var uuid = require('uuid');
 var passport = require('./lib/passport');
 
-var routes = require('./routes/index');
-// var users = require('./routes/users');
-
 var app = express();
 
 /** DOC
@@ -48,7 +45,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', routes);
+// routers
+//app.use('/', routes);
+app.use('/auth', require('./routes/auth'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
