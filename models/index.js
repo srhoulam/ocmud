@@ -3,9 +3,8 @@
 var fs = require('fs');
 var path = require('path');
 var mongoose = require('mongoose');
-process.env.MONGO_URI || require('dotenv').load();
-
 mongoose.Promise = Promise;
+process.env.MONGO_URI || require('dotenv').load();
 
 fs.readdirSync(__dirname).forEach(function(file) {
     if(file === 'index.js') {
