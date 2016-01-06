@@ -7,6 +7,7 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 var db = require('./models');
 var uuid = require('uuid');
+var passport = require('./lib/passport');
 
 var routes = require('./routes/index');
 // var users = require('./routes/users');
@@ -42,6 +43,10 @@ app.use(session({
     });
   }
 }));
+
+// auth middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', routes);
 
