@@ -1,7 +1,7 @@
 'use strict';
 
 var bcrypt = require('bcrypt');
-var validator = require('validator');
+//var validator = require('validator');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var uniqueValidator = require('mongoose-unique-validator');
