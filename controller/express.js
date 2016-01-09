@@ -7,7 +7,9 @@ var controller = {
     auth : {
         auth : passport.authenticate('localRegister')
     },
-    command : {}
+    command : {
+        patch : function() {}
+    }
 };
 
 module.exports = controller;
