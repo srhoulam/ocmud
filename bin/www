@@ -7,7 +7,7 @@
  */
 
 var debug = require('debug')('test:server');
-var ctrl = require('../controller/socket');
+var socketSetup = require('../controller/socket');
 var app = require('../app');
 var http = require('http');
 
@@ -24,13 +24,12 @@ app.set('port', port);
 
 var server = http.createServer(app);
 var io = require('socket.io')(server);
-server.origins('*');
 
 /**
  * Set handler on socket.io
  */
 
-io.on('connection', ctrl);
+socketSetup(io);
 
 /**
  * Listen on provided port, on all network interfaces.
