@@ -3,7 +3,7 @@
 var passport = require('../lib/passport');
 
 var controller = {
-    root : {},
+//    root : {},
     auth : {
         auth : passport.authenticate('localRegister')
     },
