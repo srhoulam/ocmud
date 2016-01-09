@@ -34,18 +34,22 @@ function onConnection(socket) {
                     socket.emit('info', "You move " + directionNames[dirIndex] + ".");
                 });
             } else if(cmd === 'look') {
-                Object.keys(socket.location.toObject()).filter(function(elem) {
+                let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
                     return socket.location[elem] !== socket.location.id &&
                         socket.location[elem] !== '__v' &&
                         socket.location[elem] !== 'random';
-                }); // list of location features, e.g., exits
+                });
+
+                socket.emit('options', locFeatures);
+            } else {
+                socket.emit('info', "Unsupported.");
             }
         });
     }).then(function() {
         io.emit('numClients', {
             clients : ++totalConnections
         });
-    }).catch(function(err) {
+    }).catch(function() {
         socket.disconnect();
     });
 }
