@@ -42,7 +42,7 @@ function onConnection(socket) {
 
                 socket.emit('options', locFeatures);
             } else {
-                socket.emit('info', "Unsupported.");
+                socket.emit('info', "Unsupported."); // for now
             }
         });
     }).then(function() {
