@@ -17,7 +17,7 @@ const directionNames = ['north', 'east', 'west', 'south'];
 
 function onConnection(socket) {
     Location.findRandom().limit(1).exec().then(function(loc) {
-        socket.location = loc;
+        socket.location = loc[0];
         socket.join('numClients');
     }).then(function() {
         socket.on('disconnect', function() {
@@ -58,7 +58,7 @@ function setup(argIo) {
     io = argIo;
 
     // set CORS origins
-    io.origins('*'); // for now
+//    io.origins('localhost:3000'); // for now
 
     // set connection handler
     io.on('connection', onConnection);
