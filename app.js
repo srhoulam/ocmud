@@ -32,7 +32,7 @@ app.use(session({
   store : new MongoStore({
     mongooseConnection : db.connection
   }),
-  saveUnitialized : false,
+  saveUninitialized : false,
   resave : false,
   genid : function() {
     return uuid.v4({
