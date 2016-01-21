@@ -8,6 +8,7 @@ var MongoStore = require('connect-mongo')(session);
 var db = require('./models');
 var uuid = require('uuid');
 var passport = require('./lib/passport');
+var cors = require('cors');
 
 var app = express();
 
@@ -24,6 +25,10 @@ process.env.SESSION_SECRET || require('dotenv').load();
 
 // apply middleware to express instance
 app.use(logger(app.get('env') === 'development' ? 'dev' : 'combined'));
+app.use(cors({
+  origin : '*', // for now
+  credentials : true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
