@@ -29,10 +29,16 @@ function onConnection(socket) {
         socket.on('command', function(cmd) {
             var dirIndex = direction.indexOf(cmd);
             if(dirIndex >= 0) {
-                Location.findById(socket.location[cmd]).exec().then(function(loc) {
-                    socket.location = loc;
-                    socket.emit('info', "You move " + directionNames[dirIndex] + ".");
-                });
+                if(socket.location[cmd].toString() === socket.location._id.toString()) {
+                    // socket.emit('moved', false);
+                    socket.emit('info', "There is no exit in that direction.");
+                } else {
+                    Location.findById(socket.location[cmd]).exec().then(function(loc) {
+                        socket.location = loc;
+                        // socket.emit('moved', true);
+                        socket.emit('info', "You move " + directionNames[dirIndex] + ".");
+                    });
+                }
             } else if(cmd === 'look') {
                 let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
                     return direction.indexOf(elem) >= 0 &&
