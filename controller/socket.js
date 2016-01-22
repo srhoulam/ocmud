@@ -35,12 +35,13 @@ function onConnection(socket) {
                 });
             } else if(cmd === 'look') {
                 let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
-                    return socket.location[elem] !== socket.location.id &&
-                        socket.location[elem] !== '__v' &&
-                        socket.location[elem] !== 'random';
+                    return direction.indexOf(elem) >= 0;
                 });
 
-                socket.emit('options', locFeatures);
+                socket.emit('sight', {
+                    desc : socket.location.description || "A rather ordinary place.",
+                    exits : locFeatures
+                });
             } else {
                 socket.emit('info', "Unsupported."); // for now
             }
