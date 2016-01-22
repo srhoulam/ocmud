@@ -60,5 +60,8 @@ locationSchema.methods.attachNorth = attacherFactory('n');
 locationSchema.methods.attachSouth = attacherFactory('s');
 locationSchema.methods.attachEast = attacherFactory('e');
 locationSchema.methods.attachWest = attacherFactory('w');
+locationSchema.methods.notSelfRef = function notSelfRef(attr) {
+    return this[attr].toString() !== this._id.toString();
+};
 
 module.exports = locationSchema;

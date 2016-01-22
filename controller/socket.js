@@ -29,7 +29,7 @@ function onConnection(socket) {
         socket.on('command', function(cmd) {
             var dirIndex = direction.indexOf(cmd);
             if(dirIndex >= 0) {
-                if(socket.location[cmd].toString() === socket.location._id.toString()) {
+                if(!socket.location.notSelfRef(cmd)) {
                     // socket.emit('moved', false);
                     socket.emit('info', "There is no exit in that direction.");
                 } else {
@@ -42,7 +42,7 @@ function onConnection(socket) {
             } else if(cmd === 'look') {
                 let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
                     return direction.indexOf(elem) >= 0 &&
-                        socket.location[elem].toString() !== socket.location._id.toString();
+                        socket.location.notSelfRef(elem);
                 });
 
                 socket.emit('sight', {
