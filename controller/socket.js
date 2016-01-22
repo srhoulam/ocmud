@@ -35,7 +35,8 @@ function onConnection(socket) {
                 });
             } else if(cmd === 'look') {
                 let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
-                    return direction.indexOf(elem) >= 0;
+                    return direction.indexOf(elem) >= 0 &&
+                        socket.location[elem].toString() !== socket.location._id.toString();
                 });
 
                 socket.emit('sight', {
