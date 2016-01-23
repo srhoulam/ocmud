@@ -14,11 +14,21 @@ var io = null;
 
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
+const filteredAttrs = ['__v', '_id', 'random'];
 
 function onConnection(socket) {
     Location.findRandom().limit(1).exec().then(function(loc) {
-        socket.location = loc[0];
         socket.join('numClients');
+
+        if(loc.length === 0) {
+            throw new Error("No Locations exist.");
+        }
+
+        return loc[0];
+    }).catch(function() {
+        return Location.create({});
+    }).then(function(loc) {
+        socket.location = loc;
     }).then(function() {
         socket.on('disconnect', function() {
             io.emit('numClients', {
@@ -41,7 +51,7 @@ function onConnection(socket) {
                 }
             } else if(cmd === 'look') {
                 let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
-                    return direction.indexOf(elem) >= 0 &&
+                    return filteredAttrs.indexOf(elem) === -1 &&
                         socket.location.notSelfRef(elem);
                 });
 
@@ -49,6 +59,8 @@ function onConnection(socket) {
                     desc : socket.location.description || "A rather ordinary place.",
                     exits : locFeatures
                 });
+            } else if(cmd === 'write') {
+                socket.emit('info', "Write with what? (Not yet implemented.)");
             } else {
                 socket.emit('info', "Unsupported."); // for now
             }
