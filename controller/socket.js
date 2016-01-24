@@ -116,6 +116,9 @@ function processCommand(socket, cmd) {
         case 'write':
             func.command.write(socket);
             break;
+        case 'whoami':
+            socket.emit('info', JSON.stringify(socket.request.user));
+            break;
         default:
             socket.emit('info', "Unsupported."); // for now
             break;
