@@ -33,7 +33,7 @@
     "mongoose-unique-validator": "^0.6.2",
     "morgan": "^1.6.1",
     "passport": "^0.3.2",
-    "passport-local-register": "^1.0.0",
+    "passport-local-register": "^1.0.2",
     "passport.socketio": "^3.6.1",
     "socket.io": "^1.3.7",
     "uuid": "^2.0.1",
