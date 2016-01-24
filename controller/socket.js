@@ -64,6 +64,18 @@ const func = {
         write : function writeHandler(socket) {
             socket.emit('info', "Write with what? (Not yet implemented.)");
         }
+    },
+    auth : {
+        success : function onAuthSuccess(data, accept) {
+            return accept();
+        },
+        fail : function onAuthFail(data, message, error, accept) {
+            if(error) {
+                throw new Error(message);
+            }
+
+            return accept();
+        }
     }
 };
 
@@ -72,7 +84,9 @@ process.env.SESSION_SECRET || require('dotenv').load();
 const authorizer = passportSocketIo.authorize({
     key : 'ocmud.sid',
     secret : process.env.SESSION_SECRET,
-    store : sessionStore
+    store : sessionStore,
+    success : func.auth.success,
+    fail : func.auth.fail
 });
 // end global constants
 
@@ -117,6 +131,7 @@ function setHandlers(socket) {
 }
 
 function onConnection(socket) {
+    debugger;
     //  choose random starting point
     Location.findRandom().limit(1).exec().then(function(loc) {
         socket.join('numClients');
@@ -140,10 +155,13 @@ function onConnection(socket) {
 function setup(argIo) {
     io = argIo;
 
-    // set CORS origins
+    //  set CORS origins
 //    io.origins(...); // for now
 
-    // set connection handler
+    //  use authentication
+    io.use(authorizer);
+
+    //  set connection handler
     io.on('connection', onConnection);
 }
 
