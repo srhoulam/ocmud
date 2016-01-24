@@ -14,6 +14,10 @@ var locationSchema = new Schema({
         ref : 'User'
     },
     name : String,
+    description : {
+        type : String,
+        default : "A rather ordinary place."
+    },
     n : {
         type : Schema.Types.ObjectId,
         ref : 'Location'
