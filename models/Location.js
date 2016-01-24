@@ -3,13 +3,17 @@
 var mongoose = require('mongoose');
 var selfRefPlugin = require('mongoose-selfreference');
 var randomPlugin = require('mongoose-random');
+var timeSince = require('../lib/time');
+var genName = require('../lib/names');
+
 var Schema = mongoose.Schema;
 
 var locationSchema = new Schema({
-    userId : {
+    ownerId : {
         type : Schema.Types.ObjectId,
         ref : 'User'
     },
+    name : String,
     n : {
         type : Schema.Types.ObjectId,
         ref : 'Location'
@@ -62,6 +66,14 @@ locationSchema.methods.attachEast = attacherFactory('e');
 locationSchema.methods.attachWest = attacherFactory('w');
 locationSchema.methods.notSelfRef = function notSelfRef(attr) {
     return this[attr].toString() !== this._id.toString();
+};
+locationSchema.methods.genName = function genLocName() {
+    // generate a name based on the hour and week
+    var t = timeSince();
+    var name = genName(t.hours, t.minutes, t.seconds);
+
+    this.name = name;
+    return this.save();
 };
 
 module.exports = locationSchema;
