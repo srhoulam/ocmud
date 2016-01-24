@@ -26,7 +26,9 @@ function onConnection(socket) {
 
         return loc[0];
     }).catch(function() {
-        return Location.create({});
+        return Location.create({
+            name : "The Origin"
+        });
     }).then(function(loc) {
         socket.location = loc;
     }).then(function() {
