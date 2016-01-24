@@ -51,6 +51,13 @@ app.use(passport.session());
 // routers
 app.use('/auth', require('./routes/auth'));
 
+//  serve front-end from same origin
+//      socket.io won't send the session cookie otherwise
+//
+//  remove this for production and use a reverse proxy
+//      to serve the files from the same origin as the app
+app.use('/pub', express.static(__dirname + "/../ocmud-fe"));
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
