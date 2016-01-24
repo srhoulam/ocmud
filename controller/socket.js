@@ -24,7 +24,68 @@ const originOptions = {
     description : "The beginning of All Things."
 };
 
+//  Rather than instantiating and garbage collecting many functions
+//      per socket, retain single instances of each needed function
+//      where possible.
+//  Secondarily, simplify the flow of the code by refactoring bulky
+//      code into attributes of this object.
+const func = {
+    disconnect : function disconnectHandler() {
+        io.emit('numClients', {
+            clients : --totalConnections
+        });
+    },
+    createOrigin : function createOrigin() {
+        //  create origin if no Locations exist
+        return Location.create(originOptions);
+    },
+    incrementClients : function() {
+        io.emit('numClients', {
+            clients : ++totalConnections
+        });
+    },
+    processCommand : function processCommand(socket, cmd) {
+        var dirIndex = direction.indexOf(cmd);
+        if(dirIndex >= 0) {
+            if(!socket.location.notSelfRef(cmd)) {
+                // socket.emit('moved', false);
+                socket.emit('info', "There is no exit in that direction.");
+            } else {
+                Location.findById(socket.location[cmd]).exec().then(function(loc) {
+                    socket.location = loc;
+                    // socket.emit('moved', true);
+                    socket.emit('info', "You move " + directionNames[dirIndex] + ".");
+                });
+            }
+        } else if(cmd === 'look') {
+            let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
+                return filteredAttrs.indexOf(elem) === -1 &&
+                    socket.location.notSelfRef(elem);
+            });
+
+            socket.emit('sight', {
+                name : socket.location.name,
+                desc : socket.location.description,
+                exits : locFeatures
+            });
+        } else if(cmd === 'write') {
+            socket.emit('info', "Write with what? (Not yet implemented.)");
+        } else {
+            socket.emit('info', "Unsupported."); // for now
+        }
+    }
+};
+
+function setHandlers(socket) {
+    socket.on('disconnect', func.disconnect);
+
+    socket.on('command', function(cmd) {
+        func.processCommand(socket, cmd);
+    });
+}
+
 function onConnection(socket) {
+    //  choose random starting point
     Location.findRandom().limit(1).exec().then(function(loc) {
         socket.join('numClients');
 
@@ -33,52 +94,13 @@ function onConnection(socket) {
         }
 
         return loc[0];
-    }).catch(function() {
-        return Location.create(originOptions);
-    }).then(function(loc) {
+    }).catch(func.createOrigin
+    ).then(function(loc) {
         socket.location = loc;
     }).then(function() {
-        socket.on('disconnect', function() {
-            io.emit('numClients', {
-                clients : --totalConnections
-            });
-        });
-
-        socket.on('command', function(cmd) {
-            var dirIndex = direction.indexOf(cmd);
-            if(dirIndex >= 0) {
-                if(!socket.location.notSelfRef(cmd)) {
-                    // socket.emit('moved', false);
-                    socket.emit('info', "There is no exit in that direction.");
-                } else {
-                    Location.findById(socket.location[cmd]).exec().then(function(loc) {
-                        socket.location = loc;
-                        // socket.emit('moved', true);
-                        socket.emit('info', "You move " + directionNames[dirIndex] + ".");
-                    });
-                }
-            } else if(cmd === 'look') {
-                let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
-                    return filteredAttrs.indexOf(elem) === -1 &&
-                        socket.location.notSelfRef(elem);
-                });
-
-                socket.emit('sight', {
-                    name : socket.location.name,
-                    desc : socket.location.description,
-                    exits : locFeatures
-                });
-            } else if(cmd === 'write') {
-                socket.emit('info', "Write with what? (Not yet implemented.)");
-            } else {
-                socket.emit('info', "Unsupported."); // for now
-            }
-        });
-    }).then(function() {
-        io.emit('numClients', {
-            clients : ++totalConnections
-        });
-    }).catch(function() {
+        setHandlers(socket);
+    }).then(func.incrementClients
+    ).catch(function() {
         socket.disconnect();
     });
 }
