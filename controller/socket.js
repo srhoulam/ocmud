@@ -58,6 +58,7 @@ function onConnection(socket) {
                 });
 
                 socket.emit('sight', {
+                    name : socket.location.name,
                     desc : socket.location.description || "A rather ordinary place.",
                     exits : locFeatures
                 });
