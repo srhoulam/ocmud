@@ -14,7 +14,7 @@ var io = null;
 
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
-const filteredAttrs = ['__v', '_id', 'random'];
+const filteredAttrs = ['__v', '_id', 'random', 'name', 'ownerId'];
 
 function onConnection(socket) {
     Location.findRandom().limit(1).exec().then(function(loc) {
