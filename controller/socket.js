@@ -44,21 +44,9 @@ const func = {
             clients : ++totalConnections
         });
     },
-    processCommand : function processCommand(socket, cmd) {
-        var dirIndex = direction.indexOf(cmd);
-        if(dirIndex >= 0) {
-            if(!socket.location.notSelfRef(cmd)) {
-                // socket.emit('moved', false);
-                socket.emit('info', "There is no exit in that direction.");
-            } else {
-                Location.findById(socket.location[cmd]).exec().then(function(loc) {
-                    socket.location = loc;
-                    // socket.emit('moved', true);
-                    socket.emit('info', "You move " + directionNames[dirIndex] + ".");
-                });
-            }
-        } else if(cmd === 'look') {
-            let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
+    command : {
+        look : function lookHandler(socket) {
+            var locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
                 return filteredAttrs.indexOf(elem) === -1 &&
                     socket.location.notSelfRef(elem);
             });
@@ -68,10 +56,40 @@ const func = {
                 desc : socket.location.description,
                 exits : locFeatures
             });
-        } else if(cmd === 'write') {
+        },
+        write : function writeHandler(socket) {
             socket.emit('info', "Write with what? (Not yet implemented.)");
-        } else {
-            socket.emit('info', "Unsupported."); // for now
+        }
+    },
+    processCommand : function processCommand(socket, cmd) {
+        switch(cmd) {
+            case 'n':
+            case 'e':
+            case 'w':
+            case 's':
+                let dirName = directionNames[direction.indexOf(cmd)];
+
+                if(!socket.location.notSelfRef(cmd)) {
+                    // socket.emit('moved', false);
+                    socket.emit('info', "There is no exit in that direction.");
+                } else {
+                    Location.findById(socket.location[cmd]).exec().then(function(loc) {
+                        socket.location = loc;
+                        // socket.emit('moved', true);
+                        socket.emit('info', "You move " + dirName + ".");
+                    });
+                }
+
+                break;
+            case 'look':
+                func.command.look(socket);
+                break;
+            case 'write':
+                func.command.write(socket);
+                break;
+            default:
+                socket.emit('info', "Unsupported."); // for now
+                break;
         }
     }
 };
