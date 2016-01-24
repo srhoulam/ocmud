@@ -4,8 +4,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 
 var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
-var db = require('./models');
+var sessionStore = require('./lib/sessionStore');
 var uuid = require('uuid');
 var passport = require('./lib/passport');
 var cors = require('cors');
@@ -34,9 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(session({
   secret : process.env.SESSION_SECRET,
-  store : new MongoStore({
-    mongooseConnection : db.connection
-  }),
+  store : sessionStore,
   saveUninitialized : false,
   resave : false,
   genid : function() {
