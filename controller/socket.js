@@ -32,7 +32,7 @@ const originOptions = {
 //      per socket, retain single instances of each needed function
 //      where possible.
 //  Secondarily, simplify the flow of the code by refactoring bulky
-//      code into attributes of this object.
+//      application code into attributes of `func`.
 const func = {
     disconnect : function disconnectHandler() {
         io.emit('numClients', {
@@ -43,7 +43,7 @@ const func = {
         //  create origin if no Locations exist
         return Location.create(originOptions);
     },
-    incrementClients : function() {
+    incrementClients : function incrementClients() {
         io.emit('numClients', {
             clients : ++totalConnections
         });
@@ -64,45 +64,55 @@ const func = {
         write : function writeHandler(socket) {
             socket.emit('info', "Write with what? (Not yet implemented.)");
         }
-    },
-    processCommand : function processCommand(socket, cmd) {
-        switch(cmd) {
-            case 'n':
-            case 'e':
-            case 'w':
-            case 's':
-                let dirName = directionNames[direction.indexOf(cmd)];
-
-                if(!socket.location.notSelfRef(cmd)) {
-                    // socket.emit('moved', false);
-                    socket.emit('info', "There is no exit in that direction.");
-                } else {
-                    Location.findById(socket.location[cmd]).exec().then(function(loc) {
-                        socket.location = loc;
-                        // socket.emit('moved', true);
-                        socket.emit('info', "You move " + dirName + ".");
-                    });
-                }
-
-                break;
-            case 'look':
-                func.command.look(socket);
-                break;
-            case 'write':
-                func.command.write(socket);
-                break;
-            default:
-                socket.emit('info', "Unsupported."); // for now
-                break;
-        }
     }
 };
+
+//  ensure that the session secret is at hand
+process.env.SESSION_SECRET || require('dotenv').load();
+const authorizer = passportSocketIo.authorize({
+    key : 'ocmud.sid',
+    secret : process.env.SESSION_SECRET,
+    store : sessionStore
+});
+// end global constants
+
+function processCommand(socket, cmd) {
+    switch(cmd) {
+        case 'n':
+        case 'e':
+        case 'w':
+        case 's':
+            let dirName = directionNames[direction.indexOf(cmd)];
+
+            if(!socket.location.notSelfRef(cmd)) {
+                // socket.emit('moved', false);
+                socket.emit('info', "There is no exit in that direction.");
+            } else {
+                Location.findById(socket.location[cmd]).exec().then(function(loc) {
+                    socket.location = loc;
+                    // socket.emit('moved', true);
+                    socket.emit('info', "You move " + dirName + ".");
+                });
+            }
+
+            break;
+        case 'look':
+            func.command.look(socket);
+            break;
+        case 'write':
+            func.command.write(socket);
+            break;
+        default:
+            socket.emit('info', "Unsupported."); // for now
+            break;
+    }
+}
 
 function setHandlers(socket) {
     socket.on('disconnect', func.disconnect);
 
     socket.on('command', function(cmd) {
-        func.processCommand(socket, cmd);
+        processCommand(socket, cmd);
     });
 }
 
