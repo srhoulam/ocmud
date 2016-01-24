@@ -2,8 +2,9 @@
 
 /** DOC
  *
- *  The purpose of the socket.io potion of this application
- *    is for the (read-only) "explore" mode on the front-end.
+ *  The purpose of the socket.io portion of this application
+ *      is for the (mostly read-only) "explore" mode as well
+ *      as the authenticated "create" mode.
  *
  */
 
@@ -127,7 +128,7 @@ function setup(argIo) {
     io = argIo;
 
     // set CORS origins
-//    io.origins('localhost:3000'); // for now
+//    io.origins(...); // for now
 
     // set connection handler
     io.on('connection', onConnection);
