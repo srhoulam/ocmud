@@ -14,7 +14,15 @@ var io = null;
 
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
-const filteredAttrs = ['__v', '_id', 'random', 'name', 'ownerId'];
+const filteredAttrs = [
+    '__v', '_id', 'random', 'ownerId',
+    'name', 'description', 'surface'
+];
+
+const originOptions = {
+    name : "The Origin",
+    description : "The beginning of All Things."
+};
 
 function onConnection(socket) {
     Location.findRandom().limit(1).exec().then(function(loc) {
@@ -26,9 +34,7 @@ function onConnection(socket) {
 
         return loc[0];
     }).catch(function() {
-        return Location.create({
-            name : "The Origin"
-        });
+        return Location.create(originOptions);
     }).then(function(loc) {
         socket.location = loc;
     }).then(function() {
@@ -59,7 +65,7 @@ function onConnection(socket) {
 
                 socket.emit('sight', {
                     name : socket.location.name,
-                    desc : socket.location.description || "A rather ordinary place.",
+                    desc : socket.location.description,
                     exits : locFeatures
                 });
             } else if(cmd === 'write') {

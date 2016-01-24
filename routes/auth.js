@@ -1,8 +1,8 @@
 'use strict';
 
 var router = require('express').Router();
-var ctrl = require('../controller/express').auth;
+var ctrl = require('../controller/express');
 
-router.route('/').post(ctrl.auth, ctrl.postAuth);
+router.route('/').post(ctrl.auth);
 
 module.exports = router;
