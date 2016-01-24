@@ -32,6 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(session({
+  name : "ocmud.sid",
   secret : process.env.SESSION_SECRET,
   store : sessionStore,
   saveUninitialized : false,
