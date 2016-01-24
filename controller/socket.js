@@ -9,17 +9,20 @@
  */
 
 var Location = require('../models').model('Location');
+var sessionStore = require('../lib/sessionStore');
+var passportSocketIo = require('passport.socketio');
 
+// global variables
 var totalConnections = 0;
 var io = null;
 
+// global constants
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
 const filteredAttrs = [
     '__v', '_id', 'random', 'ownerId',
     'name', 'description', 'surface'
 ];
-
 const originOptions = {
     name : "The Origin",
     description : "The beginning of All Things."
