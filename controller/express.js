@@ -1,6 +1,6 @@
 'use strict';
 
-var passport = require('../lib/passport');
+const passport = require('../lib/passport');
 
 var controller = {
     auth : passport.authenticate('localRegister'),

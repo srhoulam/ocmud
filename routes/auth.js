@@ -1,7 +1,7 @@
 'use strict';
 
-var router = require('express').Router();
-var ctrl = require('../controller/express');
+const router = require('express').Router();
+const ctrl = require('../controller/express');
 
 router.route('/').
     post(ctrl.auth).

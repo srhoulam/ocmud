@@ -1,8 +1,8 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const mongoose = require('mongoose');
 mongoose.Promise = Promise;
 process.env.MONGO_URI || require('dotenv').load();
 

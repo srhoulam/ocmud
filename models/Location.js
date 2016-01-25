@@ -1,12 +1,12 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var selfRefPlugin = require('mongoose-selfreference');
-var randomPlugin = require('mongoose-random');
-var timeSince = require('../lib/time');
-var generateName = require('../lib/names');
+const mongoose = require('mongoose');
+const selfRefPlugin = require('mongoose-selfreference');
+const randomPlugin = require('mongoose-random');
+const timeSince = require('../lib/time');
+const generateName = require('../lib/names');
 
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 var locationSchema = new Schema({
     ownerId : {
@@ -42,7 +42,7 @@ locationSchema.plugin(selfRefPlugin, {
 
 locationSchema.plugin(randomPlugin);
 
-var directionList = ['n', 'e', 's', 'w'];
+const directionList = ['n', 'e', 's', 'w'];
 
 function attacherFactory(attachDirection) {
     var oppositeDirection = directionList[

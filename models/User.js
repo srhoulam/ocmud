@@ -1,10 +1,10 @@
 'use strict';
 
-var bcrypt = require('bcrypt');
-//var validator = require('validator');
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var uniqueValidator = require('mongoose-unique-validator');
+const bcrypt = require('bcrypt');
+//const validator = require('validator');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const uniqueValidator = require('mongoose-unique-validator');
 
 var userSchema = new Schema({
     name : {

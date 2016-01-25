@@ -6,10 +6,10 @@
  * Module dependencies.
  */
 
-var debug = require('debug')('test:server');
-var socketSetup = require('../lib/socket');
-var app = require('../app');
-var http = require('http');
+const debug = require('debug')('test:server');
+const socketSetup = require('../lib/socket');
+const app = require('../app');
+const http = require('http');
 
 /**
  * Get port from environment and store in Express.
