@@ -71,13 +71,11 @@ locationSchema.methods.attachWest = attacherFactory('w');
 locationSchema.methods.notSelfRef = function notSelfRef(attr) {
     return this[attr].toString() !== this._id.toString();
 };
-locationSchema.methods.genName = function genLocName() {
+
+locationSchema.statics.genName = function genLocName() {
     // generate a name based on the hour and week
     var t = timeSince();
-    var name = generateName(t.hours, t.minutes, t.seconds);
-
-    this.name = name;
-    return this.save();
+    return generateName(t.hours, t.minutes, t.seconds);
 };
 
 module.exports = locationSchema;
