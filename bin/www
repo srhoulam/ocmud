@@ -7,7 +7,7 @@
  */
 
 var debug = require('debug')('test:server');
-var socketSetup = require('../controller/socket');
+var socketSetup = require('../lib/socket');
 var app = require('../app');
 var http = require('http');
 
