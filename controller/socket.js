@@ -8,6 +8,15 @@ const filteredAttrs = [
     'name', 'description', 'surface'
 ];
 
+//  Utility functions
+function dirName(dirInitial) {
+    return directionNames[direction.indexOf(dirInitial)];
+}
+function capInitial(str) {
+    return str[0].toUpperCase() + str.slice(1);
+}
+
+//  Command handlers
 function look(socket) {
     var locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
         return filteredAttrs.indexOf(elem) === -1 &&
@@ -23,17 +32,44 @@ function look(socket) {
 function write(socket) {
     socket.emit('info', "Write with what? (Not yet implemented.)");
 }
-function create(socket, params) {}
+function create(socket, params) {
+    var paramObj = {
+        direction : params[0],
+        desc : params.slice(1).join(' ')
+    };
+
+    if(socket.request.user.logged_in) {
+        Location.create({
+            ownerId : socket.request.user.id,
+            name : Location.genName(),
+            description : paramObj.desc || undefined
+        }).then(function(newLoc) {
+            socket.emit('info', JSON.stringify(newLoc));
+            return socket.location['attach' + capInitial(dirName(paramObj.direction))](newLoc);
+        }).then(function() {
+            socket.emit(
+                'info',
+                "You create a new location to the " + dirName(paramObj.direction) + "."
+            );
+            look(socket);
+        }).catch(function(err) {
+            socket.emit('info', err.message);
+        });
+    } else {
+        socket.emit('info', "Only registered users can create locations.");
+    }
+}
 
 function processCommand(socket, cmd) {
+    //  turn `cmd` into an object later and `switch` on `cmd.type`
+    //      for easier parameter handling, i.e., no need to split
+    //      or sanitize strings
     var splitCmd = cmd.replace(/^\s+/, '').split(' ');
     switch(splitCmd[0]) {
         case 'n':
         case 'e':
         case 'w':
         case 's':
-            let dirName = directionNames[direction.indexOf(splitCmd[0])];
-
             if(!socket.location.notSelfRef(splitCmd[0])) {
                 // socket.emit('moved', false);
                 socket.emit('info', "There is no exit in that direction.");
@@ -41,7 +77,8 @@ function processCommand(socket, cmd) {
                 Location.findById(socket.location[splitCmd[0]]).exec().then(function(loc) {
                     socket.location = loc;
                     // socket.emit('moved', true);
-                    socket.emit('info', "You move " + dirName + ".");
+                    socket.emit('info', "You move " + dirName(splitCmd[0]) + ".");
+                    look(socket);
                 });
             }
 
