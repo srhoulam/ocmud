@@ -43,7 +43,7 @@ function move(socket, direction) {
     }
 }
 function jump(socket, params) {
-    var paramObj = {
+    const paramObj = {
         index : parseInt(params[0], 10)
     };
 
@@ -66,8 +66,32 @@ function jump(socket, params) {
 function write(socket) {
     socket.emit('info', "Write with what? (Not yet implemented.)");
 }
+function connect(socket, params) {
+    const paramObj = {
+        direction : params[0],
+        index : parseInt(params[1], 10)
+    };
+
+    if(socket.request.user.logged_in) {
+        const targetLocID = socket.request.user.locations[paramObj.index];
+        Location.findById(targetLocID).then(function(targetLoc) {
+            const methodName = 'attach' + capInitial(dirName(paramObj.direction));
+            return socket.location[methodName](targetLoc);
+        }).then(function() {
+            socket.emit(
+                'info',
+                "You attach a location to the " + dirName(paramObj.direction) + "."
+            );
+            look(socket);
+        }).catch(function(err) {
+            socket.emit('info', err.message);
+        });
+    } else {
+        socket.emit('info', "Only registered users can connect locations.");
+    }
+}
 function create(socket, params) {
-    var paramObj = {
+    const paramObj = {
         direction : params[0],
         desc : params.slice(1).join(' ')
     };
@@ -78,9 +102,7 @@ function create(socket, params) {
             name : Location.genName(),
             description : paramObj.desc || undefined
         }).then(function(newLoc) {
-            socket.emit('info', JSON.stringify(newLoc));
-
-            var methodName = 'attach' + capInitial(dirName(paramObj.direction));
+            const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             var attachPromise = socket.location[methodName](newLoc);
             var registerPromise = socket.request.user.addLocation(newLoc);
 
@@ -111,25 +133,28 @@ function processCommand(socket, cmd) {
         case 's':
             move(socket, splitCmd[0]);
             break;
+        case 'connect':
+            connect(socket, splitCmd.slice(1));
+            break;
+        case 'create':
+            create(socket, splitCmd.slice(1));
+            break;
         case 'j':
         case 'jump':
             jump(socket, splitCmd.slice(1));
             break;
         case 'l':
+        case 'list':
+            socket.emit('info', JSON.stringify(socket.request.user.locations));
+            break;
         case 'look':
             look(socket);
-            break;
-        case 'write':
-            write(socket);
-            break;
-        case 'create':
-            create(socket, splitCmd.slice(1));
             break;
         case 'whoami':
             socket.emit('info', JSON.stringify(socket.request.user));
             break;
-        case 'status':
-            socket.emit('info', socket.request.user.logged_in);
+        case 'write':
+            write(socket);
             break;
         default:
             socket.emit('info', "Unsupported."); // for now
