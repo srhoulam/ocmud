@@ -39,7 +39,7 @@ var userSchema = new Schema({
 
 userSchema.plugin(uniqueValidator);
 
-userSchema.methods.comparePassword = function(password) {
+userSchema.methods.comparePassword = function userCmpPassword(password) {
     var self = this;
 
     return new Promise(function(res, rej) {
@@ -54,7 +54,7 @@ userSchema.methods.comparePassword = function(password) {
     });
 };
 
-userSchema.methods.setPassword = function(password) {
+userSchema.methods.setPassword = function userSetPassword(password) {
     var self = this;
 
     return (new Promise(function saltExec(res, rej) {
@@ -81,6 +81,11 @@ userSchema.methods.setPassword = function(password) {
         self.digest = digest;
         return self.save();
     });
+};
+
+userSchema.methods.addLocation = function userAddLoc(location) {
+    this.locations.push(location.id);
+    return this.save();
 };
 
 module.exports = userSchema;
