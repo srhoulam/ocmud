@@ -21,13 +21,15 @@ var userSchema = new Schema({
         type : Boolean,
         default : false
     },
-    confirmCode : {
+    emailConfirmCode : {
         type : String
         // does `default` attr accept functions?
         // spin confirmation code generation off into a module in ../lib
     },*/
     digest : String,
     // phone : String, // for twilio integration
+    // phoneConfirmed
+    // phoneConfirmCode
     locations : {
         type : [Schema.Types.ObjectId],
         ref : 'Location',
