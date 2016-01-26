@@ -143,7 +143,6 @@ function processCommand(socket, cmd) {
         case 'jump':
             jump(socket, splitCmd.slice(1));
             break;
-        case 'l':
         case 'list':
             socket.emit('info', JSON.stringify(socket.request.user.locations));
             break;
