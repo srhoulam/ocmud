@@ -149,6 +149,11 @@ function processCommand(socket, cmd) {
         case 'look':
             look(socket);
             break;
+        case 'q':
+        case 'quit':
+            socket.emit('info', "Bye.");
+            socket.disconnect();
+            break;
         case 'whoami':
             socket.emit('info', JSON.stringify(socket.request.user));
             break;
