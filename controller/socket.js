@@ -58,7 +58,12 @@ function create(socket, params) {
             description : paramObj.desc || undefined
         }).then(function(newLoc) {
             socket.emit('info', JSON.stringify(newLoc));
-            return socket.location['attach' + capInitial(dirName(paramObj.direction))](newLoc);
+
+            var methodName = 'attach' + capInitial(dirName(paramObj.direction));
+            var attachPromise = socket.location[methodName](newLoc);
+            var registerPromise = socket.request.user.addLocation(newLoc);
+
+            return Promise.all([attachPromise, registerPromise]);
         }).then(function() {
             socket.emit(
                 'info',
