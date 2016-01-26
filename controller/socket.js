@@ -29,6 +29,19 @@ function look(socket) {
         exits : locFeatures
     });
 }
+function move(socket, direction) {
+    if(!socket.location.notSelfRef(direction)) {
+        // socket.emit('moved', false);
+        socket.emit('info', "There is no exit in that direction.");
+    } else {
+        Location.findById(socket.location[direction]).exec().then(function(loc) {
+            socket.location = loc;
+            // socket.emit('moved', true);
+            socket.emit('info', "You move " + dirName(direction) + ".");
+            look(socket);
+        });
+    }
+}
 function write(socket) {
     socket.emit('info', "Write with what? (Not yet implemented.)");
 }
@@ -70,19 +83,9 @@ function processCommand(socket, cmd) {
         case 'e':
         case 'w':
         case 's':
-            if(!socket.location.notSelfRef(splitCmd[0])) {
-                // socket.emit('moved', false);
-                socket.emit('info', "There is no exit in that direction.");
-            } else {
-                Location.findById(socket.location[splitCmd[0]]).exec().then(function(loc) {
-                    socket.location = loc;
-                    // socket.emit('moved', true);
-                    socket.emit('info', "You move " + dirName(splitCmd[0]) + ".");
-                    look(socket);
-                });
-            }
-
+            move(socket, splitCmd[0]);
             break;
+        case 'l':
         case 'look':
             look(socket);
             break;
