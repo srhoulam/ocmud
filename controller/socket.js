@@ -42,6 +42,27 @@ function move(socket, direction) {
         });
     }
 }
+function jump(socket, params) {
+    var paramObj = {
+        index : parseInt(params[0], 10)
+    };
+
+    if(
+        Number.isFinite(paramObj.index) &&
+            paramObj.index >= 0 &&
+            paramObj.index < socket.request.user.locations.length
+    ) {
+        Location.
+            findById(socket.request.user.locations[paramObj.index]).
+            exec().then(function(targetLoc) {
+                socket.location = targetLoc;
+                socket.emit('info', "You jump to one of the locations you created.");
+                look(socket);
+            });
+    } else {
+        socket.emit('info', "Ha ha. Nice try.");
+    }
+}
 function write(socket) {
     socket.emit('info', "Write with what? (Not yet implemented.)");
 }
@@ -89,6 +110,10 @@ function processCommand(socket, cmd) {
         case 'w':
         case 's':
             move(socket, splitCmd[0]);
+            break;
+        case 'j':
+        case 'jump':
+            jump(socket, splitCmd.slice(1));
             break;
         case 'l':
         case 'look':
