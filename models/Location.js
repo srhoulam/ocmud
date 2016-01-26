@@ -75,7 +75,7 @@ locationSchema.methods.notSelfRef = function notSelfRef(attr) {
 locationSchema.statics.genName = function genLocName() {
     // generate a name based on the hour and week
     var t = timeSince();
-    return generateName(t.hours, t.minutes, t.seconds);
+    return generateName(t.cycles, t.periods, t.ticks);
 };
 
 module.exports = locationSchema;
