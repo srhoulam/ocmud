@@ -99,7 +99,6 @@ function create(socket, params) {
     if(socket.request.user.logged_in) {
         Location.create({
             ownerId : socket.request.user.id,
-            name : Location.genName(),
             description : paramObj.desc || undefined
         }).then(function(newLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));

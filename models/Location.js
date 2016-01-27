@@ -13,7 +13,14 @@ var locationSchema = new Schema({
         type : Schema.Types.ObjectId,
         ref : 'User'
     },
-    name : String,
+    name : {
+        type : String,
+        default : function locNameDefault() {
+            // generate a name based on the hour and week
+            var t = timeSince();
+            return generateName(t.cycles, t.periods, t.ticks);
+        }
+    },
     description : {
         type : String,
         default : "A rather ordinary place."
@@ -70,12 +77,6 @@ locationSchema.methods.attachEast = attacherFactory('e');
 locationSchema.methods.attachWest = attacherFactory('w');
 locationSchema.methods.notSelfRef = function notSelfRef(attr) {
     return this[attr].toString() !== this._id.toString();
-};
-
-locationSchema.statics.genName = function genLocName() {
-    // generate a name based on the hour and week
-    var t = timeSince();
-    return generateName(t.cycles, t.periods, t.ticks);
 };
 
 module.exports = locationSchema;
