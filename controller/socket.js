@@ -4,7 +4,7 @@ const Location = require('../models').model('Location');
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
 const filteredAttrs = [
-    '__v', '_id', 'random', 'ownerId',
+    '__v', '_id', 'random', 'owner',
     'name', 'description', 'surface'
 ];
 
@@ -23,10 +23,14 @@ function look(socket) {
             socket.location.notSelfRef(elem);
     });
 
+    var writings = socket.location.surface &&
+        socket.location.surface.toObject().writings;
+
     socket.emit('sight', {
         name : socket.location.name,
         desc : socket.location.description,
-        exits : locFeatures
+        exits : locFeatures,
+        'writings' : writings
     });
 }
 function move(socket, direction) {
