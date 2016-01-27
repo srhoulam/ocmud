@@ -1,6 +1,6 @@
 'use strict';
 
-const mongoose = require('mongoose');
+var mongoose = require('mongoose');
 const selfRefPlugin = require('mongoose-selfreference');
 const randomPlugin = require('mongoose-random');
 const timeSince = require('../lib/time');

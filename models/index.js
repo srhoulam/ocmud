@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const mongoose = require('mongoose');
+var mongoose = require('mongoose');
 mongoose.Promise = Promise;
 process.env.MONGO_URI || require('dotenv').load();
 
