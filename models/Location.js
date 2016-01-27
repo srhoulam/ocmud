@@ -79,4 +79,4 @@ locationSchema.methods.notSelfRef = function notSelfRef(attr) {
     return this[attr].toString() !== this._id.toString();
 };
 
-module.exports = locationSchema;
+module.exports = mongoose.model('Location', locationSchema);

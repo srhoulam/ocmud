@@ -11,10 +11,9 @@ fs.readdirSync(__dirname).forEach(function(file) {
         return;
     }
 
-    var modelName = file.split('.js')[0];
     var modulePath = path.join(__dirname, file);
 
-    mongoose.model(modelName, require(modulePath));
+    require(modulePath);
 });
 
 mongoose.connect(process.env.MONGO_URI);

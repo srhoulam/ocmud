@@ -88,4 +88,4 @@ userSchema.methods.addLocation = function userAddLoc(location) {
     return this.save();
 };
 
-module.exports = userSchema;
+module.exports = mongoose.model('User', userSchema);
