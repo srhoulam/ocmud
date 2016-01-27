@@ -57,8 +57,8 @@ function jump(socket, params) {
 
     if(
         Number.isFinite(paramObj.index) &&
-            paramObj.index >= 0 &&
-            paramObj.index < socket.request.user.locations.length
+        paramObj.index >= 0 &&
+        paramObj.index < socket.request.user.locations.length
     ) {
         Location.
             findById(socket.request.user.locations[paramObj.index]).
@@ -73,8 +73,20 @@ function jump(socket, params) {
         socket.emit('info', "Ha ha. Nice try.");
     }
 }
-function write(socket) {
-    socket.emit('info', "Write with what? (Not yet implemented.)");
+function write(socket, params) {
+    var paramObj = {
+        message : params.join(' ')
+    };
+
+    if(
+        socket.request.user.logged_in &&
+        socket.location.surface &&
+        socket.location.surface.write
+    ) {
+        socket.location.surface.write(socket.request.user.id, paramObj.message);
+    } else {
+        socket.emit('info', "There's nothing to write on here.");
+    }
 }
 function connect(socket, params) {
     const paramObj = {
