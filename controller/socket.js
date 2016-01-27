@@ -34,12 +34,16 @@ function move(socket, direction) {
         // socket.emit('moved', false);
         socket.emit('info', "There is no exit in that direction.");
     } else {
-        Location.findById(socket.location[direction]).exec().then(function(loc) {
-            socket.location = loc;
-            // socket.emit('moved', true);
-            socket.emit('info', "You move " + dirName(direction) + ".");
-            look(socket);
-        });
+        Location.
+            findById(socket.location[direction]).
+            populate('surface').
+            exec().
+            then(function(loc) {
+                socket.location = loc;
+                // socket.emit('moved', true);
+                socket.emit('info', "You move " + dirName(direction) + ".");
+                look(socket);
+            });
     }
 }
 function jump(socket, params) {
@@ -54,7 +58,9 @@ function jump(socket, params) {
     ) {
         Location.
             findById(socket.request.user.locations[paramObj.index]).
-            exec().then(function(targetLoc) {
+            populate('surface').
+            exec().
+            then(function(targetLoc) {
                 socket.location = targetLoc;
                 socket.emit('info', "You jump to one of the locations you created.");
                 look(socket);
@@ -98,14 +104,15 @@ function create(socket, params) {
 
     if(socket.request.user.logged_in) {
         Location.create({
-            ownerId : socket.request.user.id,
+            owner : socket.request.user.id,
             description : paramObj.desc || undefined
         }).then(function(newLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             var attachPromise = socket.location[methodName](newLoc);
             var registerPromise = socket.request.user.addLocation(newLoc);
+            var surfacePromise = newLoc.createSurface();
 
-            return Promise.all([attachPromise, registerPromise]);
+            return Promise.all([attachPromise, registerPromise, surfacePromise]);
         }).then(function() {
             socket.emit(
                 'info',

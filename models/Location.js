@@ -1,15 +1,15 @@
 'use strict';
 
 var mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Surface = require('./Surface');
 const selfRefPlugin = require('mongoose-selfreference');
 const randomPlugin = require('mongoose-random');
 const timeSince = require('../lib/time');
 const generateName = require('../lib/names').location;
 
-const Schema = mongoose.Schema;
-
 var locationSchema = new Schema({
-    ownerId : {
+    owner : {
         type : Schema.Types.ObjectId,
         ref : 'User'
     },
@@ -24,6 +24,10 @@ var locationSchema = new Schema({
     description : {
         type : String,
         default : "A rather ordinary place."
+    },
+    surface : {
+        type : Schema.Types.ObjectId,
+        ref : 'Surface'
     },
     n : {
         type : Schema.Types.ObjectId,
@@ -77,6 +81,16 @@ locationSchema.methods.attachEast = attacherFactory('e');
 locationSchema.methods.attachWest = attacherFactory('w');
 locationSchema.methods.notSelfRef = function notSelfRef(attr) {
     return this[attr].toString() !== this._id.toString();
+};
+locationSchema.methods.createSurface = function locMkSurface() {
+    var self = this;
+
+    return Surface.create({
+        location : this.id
+    }).then(function(newSurface) {
+        self.surface = newSurface.id;
+        return self.save();
+    });
 };
 
 module.exports = mongoose.model('Location', locationSchema);
