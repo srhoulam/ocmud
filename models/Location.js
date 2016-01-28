@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+var Location;
 const Surface = require('./Surface');
 const selfRefPlugin = require('mongoose-selfreference');
 const randomPlugin = require('mongoose-random');
@@ -93,4 +94,45 @@ locationSchema.methods.createSurface = function locMkSurface() {
     });
 };
 
-module.exports = mongoose.model('Location', locationSchema);
+function populateWritings(loc) {
+    if(loc.surface) {
+        return new Promise(function popExec(resolve, reject) {
+            Location.populate(loc, [{
+                path : 'surface.writings',
+                model : 'Writing'
+            }], function popCb(err, popDoc) {
+                if(err) {
+                    return reject(err);
+                }
+
+                return resolve(popDoc);
+            });
+        });
+    } else {
+        return loc;
+    }
+}
+locationSchema.statics.getInitial = function locGetInitial() {
+    return Location.
+        findRandom().
+        limit(1).
+        populate('surface').
+        exec().
+        then(function(locs) {
+            if(locs.length === 0) {
+                throw new Error("No Locations exist.");
+            }
+
+            return locs[0];
+        }).
+        then(populateWritings);
+};
+locationSchema.statics.findPopulated = function locFindPopulated(id) {
+    return Location.
+        findById(id).
+        populate('surface').
+        exec().
+        then(populateWritings);
+};
+
+module.exports = Location = mongoose.model('Location', locationSchema);
