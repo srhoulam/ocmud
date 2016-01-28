@@ -65,9 +65,7 @@ function jump(socket, params) {
         paramObj.index < socket.request.user.locations.length
     ) {
         Location.
-            findById(socket.request.user.locations[paramObj.index]).
-            populate('surface').
-            exec().
+            findPopulated(socket.request.user.locations[paramObj.index]).
             then(function(targetLoc) {
                 socket.location = targetLoc;
                 socket.emit('info', "You jump to one of the locations you created.");
@@ -87,8 +85,16 @@ function write(socket, params) {
         socket.location.surface &&
         socket.location.surface.write
     ) {
-        socket.location.surface.write(socket.request.user.id, paramObj.message);
-        look(socket);
+        socket.location.surface.
+            write(socket.request.user.id, paramObj.message).
+            then(function() {
+                Location.
+                    findPopulated(socket.location.id).
+                    then(function(loc) {
+                        socket.location = loc;
+                        look(socket);
+                    });
+            });
     } else {
         socket.emit('info', "There's nothing to write on here.");
     }
