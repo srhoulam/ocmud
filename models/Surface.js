@@ -10,7 +10,7 @@ var surfaceSchema = new Schema({
     name : {
         type : String,
         default : function surfNameDefault() {
-            return generateName(timeSince().raw);
+            return generateName(Math.floor(timeSince().raw * 3 / 500));
         }
     },
     location : {
