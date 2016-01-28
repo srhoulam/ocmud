@@ -84,6 +84,7 @@ function write(socket, params) {
         socket.location.surface.write
     ) {
         socket.location.surface.write(socket.request.user.id, paramObj.message);
+        look(socket);
     } else {
         socket.emit('info', "There's nothing to write on here.");
     }
@@ -180,7 +181,7 @@ function processCommand(socket, cmd) {
             socket.emit('info', JSON.stringify(socket.request.user));
             break;
         case 'write':
-            write(socket);
+            write(socket, splitCmd.slice(1));
             break;
         default:
             socket.emit('info', "Unsupported."); // for now
