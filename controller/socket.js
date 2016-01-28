@@ -23,8 +23,13 @@ function look(socket) {
             socket.location.notSelfRef(elem);
     });
 
-    var writings = socket.location.surface &&
-        socket.location.surface.toObject().writings;
+    var writings;
+    if(socket.location.surface) {
+        debugger;
+        writings = socket.location.surface.writings.map(function(w) {
+            return w.message;
+        });
+    }
 
     socket.emit('sight', {
         name : socket.location.name,
@@ -38,15 +43,14 @@ function move(socket, direction) {
         // socket.emit('moved', false);
         socket.emit('info', "There is no exit in that direction.");
     } else {
-        Location.
-            findById(socket.location[direction]).
-            populate('surface').
-            exec().
+        Location.findPopulated(socket.location[direction]).
             then(function(loc) {
                 socket.location = loc;
                 // socket.emit('moved', true);
                 socket.emit('info', "You move " + dirName(direction) + ".");
                 look(socket);
+            }).catch(function(err) {
+                socket.emit('info', err.message);
             });
     }
 }
