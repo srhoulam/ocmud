@@ -1,7 +1,8 @@
 'use strict';
 
 const bcrypt = require('bcrypt');
-//const validator = require('validator');
+const validator = require('validator');
+const genCode = require('../lib/confirmCodes');
 var mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const uniqueValidator = require('mongoose-unique-validator');
@@ -12,10 +13,12 @@ var userSchema = new Schema({
         required : true,
         unique : true
     },
-/*    email : {
+    digest : String,
+    email : {
         type : String,
         required : true,
-        validate : [validator.isEmail, "Email fails syntax validation."]
+        unique : true,
+        validate : [validator.isEmail, "Invalid email."]
     },
     emailConfirmed : {
         type : Boolean,
@@ -23,13 +26,28 @@ var userSchema = new Schema({
     },
     emailConfirmCode : {
         type : String
-        // does `default` attr accept functions?
-        // spin confirmation code generation off into a module in ../lib
-    },*/
-    digest : String,
-    // phone : String, // for twilio integration
-    // phoneConfirmed
-    // phoneConfirmCode
+    },
+    sendEmails : {
+        type : Boolean,
+        default : true
+    },
+    phone : {
+        type : String,
+        unique : true,
+        validate : [
+            function validatePhone(number) {
+                return validator.isMobilePhone(number, 'en-US');
+            },
+            "Invalid phone number."
+        ]
+    },
+    phoneConfirmed : {
+        type : Boolean,
+        default : false
+    },
+    phoneConfirmCode : {
+        type : String
+    },
     locations : {
         type : [Schema.Types.ObjectId],
         ref : 'Location',
@@ -53,7 +71,6 @@ userSchema.methods.comparePassword = function userCmpPassword(password) {
         });
     });
 };
-
 userSchema.methods.setPassword = function userSetPassword(password) {
     var self = this;
 
@@ -82,7 +99,17 @@ userSchema.methods.setPassword = function userSetPassword(password) {
         return self.save();
     });
 };
+userSchema.methods.setConfirmCode = function(type) {
+    if(type === 'email') {
+        this.emailConfirmCode = genCode.email();
+    } else if(type === 'phone') {
+        this.phoneConfirmCode = genCode.phone();
+    } else {
+        throw new Error("Specify type.");
+    }
 
+    return this.save();
+};
 userSchema.methods.addLocation = function userAddLoc(location) {
     this.locations.push(location.id);
     return this.save();
