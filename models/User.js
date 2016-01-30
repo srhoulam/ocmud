@@ -33,7 +33,6 @@ var userSchema = new Schema({
     },
     phone : {
         type : String,
-        unique : true,
         validate : [
             function validatePhone(number) {
                 return validator.isMobilePhone(number, 'en-US');
@@ -101,9 +100,9 @@ userSchema.methods.setPassword = function userSetPassword(password) {
 };
 userSchema.methods.setConfirmCode = function(type) {
     if(type === 'email') {
-        this.emailConfirmCode = genCode.email();
+        this.emailConfirmCode = genCode.email(this.digest);
     } else if(type === 'phone') {
-        this.phoneConfirmCode = genCode.phone();
+        this.phoneConfirmCode = genCode.phone(this.digest);
     } else {
         throw new Error("Specify type.");
     }
