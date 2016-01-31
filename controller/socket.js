@@ -1,6 +1,7 @@
 'use strict';
 
 const Location = require('../models').model('Location');
+// const email = require('../lib/emails');
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
 const filteredAttrs = [
@@ -17,88 +18,6 @@ function capInitial(str) {
 }
 
 //  Command handlers
-function look(socket) {
-    var locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
-        return filteredAttrs.indexOf(elem) === -1 &&
-            socket.location.notSelfRef(elem);
-    });
-
-    var writings;
-    if(socket.location.surface) {
-        debugger;
-        writings = socket.location.surface.writings.map(function(w) {
-            return w.message;
-        });
-    }
-
-    socket.emit('sight', {
-        name : socket.location.name,
-        desc : socket.location.description,
-        exits : locFeatures,
-        'writings' : writings
-    });
-}
-function move(socket, direction) {
-    if(!socket.location.notSelfRef(direction)) {
-        // socket.emit('moved', false);
-        socket.emit('info', "There is no exit in that direction.");
-    } else {
-        Location.findPopulated(socket.location[direction]).
-            then(function(loc) {
-                socket.location = loc;
-                // socket.emit('moved', true);
-                socket.emit('info', "You move " + dirName(direction) + ".");
-                look(socket);
-            }).catch(function(err) {
-                socket.emit('info', err.message);
-            });
-    }
-}
-function jump(socket, params) {
-    const paramObj = {
-        index : parseInt(params[0], 10)
-    };
-
-    if(
-        Number.isFinite(paramObj.index) &&
-        paramObj.index >= 0 &&
-        paramObj.index < socket.request.user.locations.length
-    ) {
-        Location.
-            findPopulated(socket.request.user.locations[paramObj.index]).
-            then(function(targetLoc) {
-                socket.location = targetLoc;
-                socket.emit('info', "You jump to one of the locations you created.");
-                look(socket);
-            });
-    } else {
-        socket.emit('info', "Ha ha. Nice try.");
-    }
-}
-function write(socket, params) {
-    var paramObj = {
-        message : params.join(' ')
-    };
-
-    if(
-        socket.request.user.logged_in &&
-        socket.location.surface &&
-        socket.location.surface.write
-    ) {
-        socket.location.surface.
-            write(socket.request.user.id, paramObj.message).
-            then(function() {
-                Location.
-                    findPopulated(socket.location.id).
-                    then(function(loc) {
-                        socket.location = loc;
-                        look(socket);
-                    });
-            });
-    } else {
-        socket.emit('info', "There's nothing to write on here.");
-    }
-}
 function connect(socket, params) {
     const paramObj = {
         direction : params[0],
@@ -153,7 +72,88 @@ function create(socket, params) {
         socket.emit('info', "Only registered users can create locations.");
     }
 }
+function jump(socket, params) {
+    const paramObj = {
+        index : parseInt(params[0], 10)
+    };
 
+    if(
+        Number.isFinite(paramObj.index) &&
+        paramObj.index >= 0 &&
+        paramObj.index < socket.request.user.locations.length
+    ) {
+        Location.
+            findPopulated(socket.request.user.locations[paramObj.index]).
+            then(function(targetLoc) {
+                socket.location = targetLoc;
+                socket.emit('info', "You jump to one of the locations you created.");
+                look(socket);
+            });
+    } else {
+        socket.emit('info', "Ha ha. Nice try.");
+    }
+}
+function look(socket) {
+    var locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
+        return filteredAttrs.indexOf(elem) === -1 &&
+            socket.location.notSelfRef(elem);
+    });
+
+    var writings;
+    if(socket.location.surface) {
+        debugger;
+        writings = socket.location.surface.writings.map(function(w) {
+            return w.message;
+        });
+    }
+
+    socket.emit('sight', {
+        name : socket.location.name,
+        desc : socket.location.description,
+        exits : locFeatures,
+        'writings' : writings
+    });
+}
+function move(socket, direction) {
+    if(!socket.location.notSelfRef(direction)) {
+        // socket.emit('moved', false);
+        socket.emit('info', "There is no exit in that direction.");
+    } else {
+        Location.findPopulated(socket.location[direction]).
+            then(function(loc) {
+                socket.location = loc;
+                // socket.emit('moved', true);
+                socket.emit('info', "You move " + dirName(direction) + ".");
+                look(socket);
+            }).catch(function(err) {
+                socket.emit('info', err.message);
+            });
+    }
+}
+function write(socket, params) {
+    var paramObj = {
+        message : params.join(' ')
+    };
+
+    if(
+        socket.request.user.logged_in &&
+        socket.location.surface &&
+        socket.location.surface.write
+    ) {
+        socket.location.surface.
+            write(socket.request.user.id, paramObj.message).
+            then(function() {
+                Location.
+                    findPopulated(socket.location.id).
+                    then(function(loc) {
+                        socket.location = loc;
+                        look(socket);
+                    });
+            });
+    } else {
+        socket.emit('info', "There's nothing to write on here.");
+    }
+}
 function processCommand(socket, cmd) {
     //  turn `cmd` into an object later and `switch` on `cmd.type`
     //      for easier parameter handling, i.e., no need to split
