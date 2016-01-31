@@ -109,6 +109,16 @@ userSchema.methods.setConfirmCode = function(type) {
 
     return this.save();
 };
+userSchema.methods.confirmEmail = function(code) {
+    if(this.emailConfirmCode === code) {
+        this.emailConfirmed = true;
+        this.emailConfirmCode = '';
+    } else {
+        throw new Error("Incorrect confirmation code.");
+    }
+
+    return this.save();
+};
 userSchema.methods.addLocation = function userAddLoc(location) {
     this.locations.push(location.id);
     return this.save();

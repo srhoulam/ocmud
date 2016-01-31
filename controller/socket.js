@@ -18,6 +18,23 @@ function capInitial(str) {
 }
 
 //  Command handlers
+function confirmEmail(socket, params) {
+    const paramObj = {
+        code : params[0]
+    };
+
+    try {
+        socket.request.user.
+            confirmEmail(paramObj.code).
+            then(function() {
+                socket.emit('emailConfirmed', true);
+                socket.emit('info', "Email successfully confirmed!");
+            });
+    } catch(ex) {
+        socket.emit('emailConfirmed', false);
+        socket.emit('info', ex.message);
+    }
+}
 function connect(socket, params) {
     const paramObj = {
         direction : params[0],
@@ -165,6 +182,10 @@ function processCommand(socket, cmd) {
         case 'w':
         case 's':
             move(socket, splitCmd[0]);
+            break;
+        case 'confirm': // for now
+        case 'confirmEmail':
+            confirmEmail(socket, splitCmd.slice(1));
             break;
         case 'connect':
             connect(socket, splitCmd.slice(1));
