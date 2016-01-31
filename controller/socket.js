@@ -118,7 +118,6 @@ function look(socket) {
 
     var writings;
     if(socket.location.surface) {
-        debugger;
         writings = socket.location.surface.writings.map(function(w) {
             return w.message;
         });
