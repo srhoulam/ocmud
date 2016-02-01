@@ -54,11 +54,14 @@ function connect(socket, params) {
                 "You attach a location to the " + dir + "."
             );
             look(socket);
-            email.connect(locs[0], {
-                who : socket.request.user.name,
-                exit : dir,
-                locName : locs[1].name
-            });
+
+            if(socket.request.user.id.toString() !== locs[0].owner.toString()) {
+                email.connect(locs[0], {
+                    who : socket.request.user.name,
+                    exit : dir,
+                    locName : locs[1].name
+                });
+            }
         }).catch(function(err) {
             socket.emit('info', err.message);
         });
@@ -77,8 +80,6 @@ function create(socket, params) {
             owner : socket.request.user.id,
             description : paramObj.desc || undefined
         }).then(function(newLoc) {
-            return newLoc.save();
-        }).then(function(newLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             var attachPromise = socket.location[methodName](newLoc);
             var registerPromise = socket.request.user.addLocation(newLoc);
@@ -94,13 +95,19 @@ function create(socket, params) {
                 "You create a new location to the " + dir + "."
             );
             look(socket);
-            email.connect(locs[0], {
-                who : socket.request.user.name,
-                exit : dir,
-                locName : locs[1].name
-            });
+
+            if(socket.request.user.id.toString() !== locs[0].owner.toString()) {
+                email.connect(locs[0], {
+                    who : socket.request.user.name,
+                    exit : dir,
+                    locName : locs[1].name
+                });
+            }
         }).catch(function(err) {
             socket.emit('info', err.message);
+            if(err.location) {
+                return err.location.remove();
+            }
         });
     } else {
         socket.emit('info', "Only registered users can create locations.");
