@@ -46,12 +46,19 @@ function connect(socket, params) {
         Location.findById(targetLocID).then(function(targetLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             return socket.location[methodName](targetLoc);
-        }).then(function() {
+        }).then(function(locs) {
+            var dir = dirName(paramObj.direction);
+
             socket.emit(
                 'info',
-                "You attach a location to the " + dirName(paramObj.direction) + "."
+                "You attach a location to the " + dir + "."
             );
             look(socket);
+            email.connect(locs[0], {
+                who : socket.request.user.name,
+                exit : dir,
+                locName : locs[1].name
+            });
         }).catch(function(err) {
             socket.emit('info', err.message);
         });
@@ -70,18 +77,28 @@ function create(socket, params) {
             owner : socket.request.user.id,
             description : paramObj.desc || undefined
         }).then(function(newLoc) {
+            return newLoc.save();
+        }).then(function(newLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             var attachPromise = socket.location[methodName](newLoc);
             var registerPromise = socket.request.user.addLocation(newLoc);
             var surfacePromise = newLoc.createSurface();
 
             return Promise.all([attachPromise, registerPromise, surfacePromise]);
-        }).then(function() {
+        }).then(function(created) {
+            var locs = created[0];
+            var dir = dirName(paramObj.direction);
+
             socket.emit(
                 'info',
-                "You create a new location to the " + dirName(paramObj.direction) + "."
+                "You create a new location to the " + dir + "."
             );
             look(socket);
+            email.connect(locs[0], {
+                who : socket.request.user.name,
+                exit : dir,
+                locName : locs[1].name
+            });
         }).catch(function(err) {
             socket.emit('info', err.message);
         });
