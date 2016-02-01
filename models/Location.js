@@ -71,7 +71,9 @@ function attacherFactory(attachDirection) {
 
             return Promise.all([this.save(), doc.save()]);
         } else {
-            throw new RangeError("Location: direction is already bound");
+            let err = new RangeError("Location: direction is already bound");
+            err.location = doc;
+            throw err;
         }
     };
 }
