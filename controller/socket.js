@@ -1,7 +1,7 @@
 'use strict';
 
 const Location = require('../models').model('Location');
-// const email = require('../lib/emails');
+const email = require('../lib/emails');
 const direction = ['n', 'e', 'w', 's'];
 const directionNames = ['north', 'east', 'west', 'south'];
 const filteredAttrs = [
@@ -141,6 +141,13 @@ function move(socket, direction) {
                 // socket.emit('moved', true);
                 socket.emit('info', "You move " + dirName(direction) + ".");
                 look(socket);
+
+                if(
+                    loc.owner &&
+                    loc.owner.toString() !== socket.request.user.id.toString()
+                ) {
+                    return email.visit(loc, socket.request.user.name);
+                }
             }).catch(function(err) {
                 socket.emit('info', err.message);
             });
