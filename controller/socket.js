@@ -128,7 +128,9 @@ function jump(socket, paramObj) {
         Location.
             findPopulated(socket.request.user.locations[paramObj.index]).
             then(function(targetLoc) {
+                socket.join(socket.location.id.toString());
                 socket.location = targetLoc;
+                socket.leave(targetLoc.id.toString());
                 socket.emit('info', "You jump to one of the locations you created.");
                 look(socket);
             });
@@ -166,7 +168,9 @@ function move(socket, paramObj) {
     } else {
         Location.findPopulated(socket.location[paramObj.direction]).
             then(function(loc) {
+                socket.leave(socket.location.id.toString());
                 socket.location = loc;
+                socket.join(loc.id.toString());
                 // socket.emit('moved', true);
                 socket.emit('info', "You move " + dirName(paramObj.direction) + ".");
                 look(socket);
