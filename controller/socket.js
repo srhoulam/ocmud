@@ -204,6 +204,13 @@ function write(socket, params) {
                         look(socket);
                     });
             });
+
+        if(socket.location.user.id.toString() !== socket.location.owner.toString()) {
+            email.write(socket.location, {
+                what : paramObj.message,
+                who : socket.location.user.name
+            });
+        }
     } else {
         socket.emit('info', "There's nothing to write on here.");
     }
