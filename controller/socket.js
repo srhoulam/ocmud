@@ -9,7 +9,7 @@ const filteredAttrs = [
     'name', 'description', 'surface'
 ];
 
-var io;
+let io;
 
 //  Utility functions
 function dirName(dirInitial) {
@@ -47,7 +47,8 @@ function connect(socket, paramObj) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             return socket.location[methodName](targetLoc);
         }).then(function(locs) {
-            var dir = dirName(paramObj.direction);
+            let dir = dirName(paramObj.direction);
+            let locOwnerId = locs[0].owner.toString();
 
             socket.emit(
                 'info',
@@ -57,8 +58,11 @@ function connect(socket, paramObj) {
 
             if(
                 locs[0].owner &&
-                socket.request.user.id.toString() !== locs[0].owner.toString()
+                socket.request.user.id.toString() !== locOwnerId
             ) {
+                io.sockets.to(locOwnerId).emit('notification', {
+                    message : `Someone has connected to ${locs[1].name}!`
+                });
                 email.connect(locs[0], {
                     who : socket.request.user.name,
                     exit : dir,
@@ -83,14 +87,15 @@ function create(socket, paramObj) {
             description : paramObj.description || undefined
         }).then(function(newLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
-            var attachPromise = socket.location[methodName](newLoc);
-            var registerPromise = socket.request.user.addLocation(newLoc);
-            var surfacePromise = newLoc.createSurface();
+            let attachPromise = socket.location[methodName](newLoc);
+            let registerPromise = socket.request.user.addLocation(newLoc);
+            let surfacePromise = newLoc.createSurface();
 
             return Promise.all([attachPromise, registerPromise, surfacePromise]);
         }).then(function(created) {
-            var locs = created[0];
-            var dir = dirName(paramObj.direction);
+            let locs = created[0];
+            let dir = dirName(paramObj.direction);
+            let locOwnerId = locs[0].owner.toString();
 
             socket.emit(
                 'info',
@@ -100,7 +105,7 @@ function create(socket, paramObj) {
 
             if(
                 locs[0].owner &&
-                socket.request.user.id.toString() !== locs[0].owner.toString()
+                socket.request.user.id.toString() !== locOwnerId
             ) {
                 email.connect(locs[0], {
                     who : socket.request.user.name,
@@ -130,9 +135,9 @@ function jump(socket, paramObj) {
         Location.
             findPopulated(socket.request.user.locations[paramObj.index]).
             then(function(targetLoc) {
-                socket.join(socket.location.id.toString());
+                socket.leave(socket.location.id.toString());
                 socket.location = targetLoc;
-                socket.leave(targetLoc.id.toString());
+                socket.join(targetLoc.id.toString());
                 socket.emit('info', "You jump to one of the locations you created.");
                 look(socket);
             });
@@ -141,12 +146,12 @@ function jump(socket, paramObj) {
     }
 }
 function look(socket) {
-    var locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
+    let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
         return filteredAttrs.indexOf(elem) === -1 &&
             socket.location.notSelfRef(elem);
     });
 
-    var writings;
+    let writings;
     if(socket.location.surface) {
         writings = socket.location.surface.writings.map(function(w) {
             return w.message;
@@ -170,11 +175,27 @@ function move(socket, paramObj) {
     } else {
         Location.findPopulated(socket.location[paramObj.direction]).
             then(function(loc) {
-                socket.leave(socket.location.id.toString());
+                let oldLocId = socket.location.id.toString();
+                let newLocId = loc.id.toString();
+                let dir = dirName(paramObj.direction);
+
+                io.sockets.to(oldLocId).emit(
+                    'info',
+                    `${socket.request.user.name} leaves to the ${dir}.`
+                );
+                socket.leave(oldLocId);
+
                 socket.location = loc;
-                socket.join(loc.id.toString());
+
+                socket.join(newLocId);
+                io.sockets.to(newLocId).emit(
+                    'info',
+                    `${socket.request.user.name} arrives from the ${dir[directionNames.indexOf(dir) + 2 % directionNames.length]}.`
+                );
+
                 // socket.emit('moved', true);
-                socket.emit('info', "You move " + dirName(paramObj.direction) + ".");
+
+                socket.emit('info', "You move " + dir + ".");
                 look(socket);
 
                 if(
