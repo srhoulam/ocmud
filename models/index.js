@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 mongoose.Promise = Promise;
 process.env.MONGO_URI || require('dotenv').load();
 
@@ -11,7 +11,7 @@ fs.readdirSync(__dirname).forEach(function(file) {
         return;
     }
 
-    var modulePath = path.join(__dirname, file);
+    let modulePath = path.join(__dirname, file);
 
     require(modulePath);
 });

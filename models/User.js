@@ -3,11 +3,11 @@
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const genCode = require('../lib/confirmCodes');
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const uniqueValidator = require('mongoose-unique-validator');
 
-var userSchema = new Schema({
+let userSchema = new Schema({
     name : {
         type : String,
         required : true,
@@ -57,7 +57,7 @@ var userSchema = new Schema({
 userSchema.plugin(uniqueValidator);
 
 userSchema.methods.comparePassword = function userCmpPassword(password) {
-    var self = this;
+    let self = this;
 
     return new Promise(function(res, rej) {
         bcrypt.compare(password, self.digest, function(err, match) {
@@ -71,7 +71,7 @@ userSchema.methods.comparePassword = function userCmpPassword(password) {
     });
 };
 userSchema.methods.setPassword = function userSetPassword(password) {
-    var self = this;
+    let self = this;
 
     return (new Promise(function saltExec(res, rej) {
         bcrypt.genSalt(16, function(err, salt) {

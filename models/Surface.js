@@ -1,12 +1,12 @@
 'use strict';
 
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Writing = require('./Writing');
 const timeSince = require('../lib/time');
 const generateName = require('../lib/names').surface;
 
-var surfaceSchema = new Schema({
+let surfaceSchema = new Schema({
     name : {
         type : String,
         default : function surfNameDefault() {
@@ -26,7 +26,7 @@ var surfaceSchema = new Schema({
 });
 
 surfaceSchema.methods.write = function surfaceWrite(ownerId, message) {
-    var self = this;
+    let self = this;
 
     return Writing.create({
         'owner' : ownerId,

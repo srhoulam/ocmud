@@ -1,15 +1,17 @@
-var express = require('express');
-//var path = require('path');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
+'use strict';
 
-var session = require('express-session');
-var sessionStore = require('./lib/sessionStore');
-var uuid = require('uuid');
-var passport = require('./lib/passport');
-var cors = require('cors');
+let express = require('express');
+//let path = require('path');
+let logger = require('morgan');
+let bodyParser = require('body-parser');
 
-var app = express();
+let session = require('express-session');
+let sessionStore = require('./lib/sessionStore');
+let uuid = require('uuid');
+let passport = require('./lib/passport');
+let cors = require('cors');
+
+let app = express();
 
 /** DOC
  *
@@ -60,7 +62,7 @@ app.use('/pub', express.static(__dirname + "/../ocmud-fe"));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
+    let err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
