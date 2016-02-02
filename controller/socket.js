@@ -188,6 +188,15 @@ function move(socket, paramObj) {
             });
     }
 }
+function say(socket, paramObj) {
+    //  Params:
+    //      message: String
+
+    io.sockets.to(socket.location.id.toString()).emit('speech', {
+        from : socket.request.user.name,
+        message : paramObj.message
+    });
+}
 function write(socket, paramObj) {
     //  Params:
     //      message: String
@@ -248,6 +257,9 @@ function processCommand(socket, cmd) {
         case 'quit':
             socket.emit('info', "Bye.");
             socket.disconnect();
+            break;
+        case 'say':
+            say(socket, cmd);
             break;
         case 'whoami':
             socket.emit('info', JSON.stringify(socket.request.user));
