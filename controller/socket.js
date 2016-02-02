@@ -9,6 +9,8 @@ const filteredAttrs = [
     'name', 'description', 'surface'
 ];
 
+var io;
+
 //  Utility functions
 function dirName(dirInitial) {
     return directionNames[direction.indexOf(dirInitial)];
@@ -259,4 +261,10 @@ function processCommand(socket, cmd) {
     }
 }
 
-module.exports = processCommand;
+function setup(argIo) {
+    io = argIo;
+
+    return processCommand;
+}
+
+module.exports = setup;
