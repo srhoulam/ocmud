@@ -1,15 +1,15 @@
 'use strict';
 
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-var Location;
+let Location;
 const Surface = require('./Surface');
 const selfRefPlugin = require('mongoose-selfreference');
 const randomPlugin = require('mongoose-random');
 const timeSince = require('../lib/time');
 const generateName = require('../lib/names').location;
 
-var locationSchema = new Schema({
+let locationSchema = new Schema({
     owner : {
         type : Schema.Types.ObjectId,
         ref : 'User'
@@ -18,7 +18,7 @@ var locationSchema = new Schema({
         type : String,
         default : function locNameDefault() {
             // generate a name based on the hour and week
-            var t = timeSince();
+            let t = timeSince();
             return generateName(t.cycles, t.periods, t.ticks);
         }
     },
@@ -57,13 +57,13 @@ locationSchema.plugin(randomPlugin);
 const directionList = ['n', 'e', 's', 'w'];
 
 function attacherFactory(attachDirection) {
-    var oppositeDirection = directionList[
+    let oppositeDirection = directionList[
         (directionList.indexOf(attachDirection) + 2) % directionList.length
     ];
 
     return function(doc) {
         // source and target locations are not already bound in the relevant directions
-        var unbound = doc[oppositeDirection].toString() === doc._id.toString() &&
+        let unbound = doc[oppositeDirection].toString() === doc._id.toString() &&
             this[attachDirection].toString() === this._id.toString();
         if(unbound) {
             doc[oppositeDirection] = this._id;
@@ -86,7 +86,7 @@ locationSchema.methods.notSelfRef = function notSelfRef(attr) {
     return this[attr].toString() !== this._id.toString();
 };
 locationSchema.methods.createSurface = function locMkSurface() {
-    var self = this;
+    let self = this;
 
     return Surface.create({
         location : this.id
