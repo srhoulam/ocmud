@@ -205,7 +205,7 @@ function write(socket, params) {
                     });
             });
 
-        if(socket.location.user.id.toString() !== socket.location.owner.toString()) {
+        if(socket.request.user.id.toString() !== socket.location.owner.toString()) {
             email.write(socket.location, {
                 what : paramObj.message,
                 who : socket.location.user.name
