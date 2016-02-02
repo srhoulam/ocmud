@@ -151,7 +151,7 @@ function look(socket) {
 
     socket.emit('sight', {
         name : socket.location.name,
-        desc : socket.location.description,
+        description : socket.location.description,
         exits : locFeatures,
         'writings' : writings
     });
