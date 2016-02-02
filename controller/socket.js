@@ -55,7 +55,10 @@ function connect(socket, params) {
             );
             look(socket);
 
-            if(socket.request.user.id.toString() !== locs[0].owner.toString()) {
+            if(
+                locs[0].owner &&
+                socket.request.user.id.toString() !== locs[0].owner.toString()
+            ) {
                 email.connect(locs[0], {
                     who : socket.request.user.name,
                     exit : dir,
@@ -96,7 +99,10 @@ function create(socket, params) {
             );
             look(socket);
 
-            if(socket.request.user.id.toString() !== locs[0].owner.toString()) {
+            if(
+                locs[0].owner &&
+                socket.request.user.id.toString() !== locs[0].owner.toString()
+            ) {
                 email.connect(locs[0], {
                     who : socket.request.user.name,
                     exit : dir,
@@ -183,9 +189,10 @@ function write(socket, params) {
     };
 
     if(
+        !(paramObj.message.match(/^\s*$/)) &&   // no blank messages
         socket.request.user.logged_in &&
-        socket.location.surface &&
-        socket.location.surface.write
+        socket.location.surface &&              // location has a surface
+        socket.location.surface.write           // surface is populated
     ) {
         socket.location.surface.
             write(socket.request.user.id, paramObj.message).
