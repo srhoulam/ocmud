@@ -242,6 +242,11 @@ function write(socket, paramObj) {
         socket.location.surface &&              // location has a surface
         socket.location.surface.write           // surface is populated
     ) {
+        socket.broadcast.to(socket.location.id.toString()).emit(
+            'action',
+            `${socket.request.user.name} writes something.`
+        );
+
         socket.location.surface.
             write(socket.request.user.id, paramObj.message).
             then(function() {
