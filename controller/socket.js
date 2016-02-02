@@ -33,7 +33,7 @@ function confirmEmail(socket, paramObj) {
             });
     } catch(ex) {
         socket.emit('emailConfirmed', false);
-        socket.emit('info', ex.message);
+        socket.emit('error', ex.message);
     }
 }
 function connect(socket, paramObj) {
@@ -48,22 +48,18 @@ function connect(socket, paramObj) {
             return socket.location[methodName](targetLoc);
         }).then(function(locs) {
             let dir = dirName(paramObj.direction);
-            let locOwnerId = locs[0].owner.toString();
 
-            socket.emit(
-                'info',
-                `You attach a location to the ${dir}.`
-            );
+            socket.emit('connect', true);
             look(socket);
 
             socket.broadcast.to(locs[0].id.toString()).emit(
                 'action',
-                `${socket.request.user.name} creates a new location to the ${dir}.`
+                `${socket.request.user.name} connects a new location to the ${dir}.`
             );
 
             if(
                 locs[0].owner &&
-                socket.request.user.id.toString() !== locOwnerId
+                socket.request.user.id.toString() !== locs[0].owner.toString()
             ) {
                 email.connect(locs[0], {
                     who : socket.request.user.name,
@@ -72,7 +68,7 @@ function connect(socket, paramObj) {
                 });
             }
         }).catch(function(err) {
-            socket.emit('info', err.message);
+            socket.emit('error', err.message);
         });
     } else {
         socket.emit('info', "Only registered users can connect locations.");
@@ -97,12 +93,8 @@ function create(socket, paramObj) {
         }).then(function(created) {
             let locs = created[0];
             let dir = dirName(paramObj.direction);
-            let locOwnerId = locs[0].owner.toString();
 
-            socket.emit(
-                'info',
-                `You create a new location to the ${dir}.`
-            );
+            socket.emit('create', true);
             look(socket);
 
             socket.broadcast.to(locs[0].id.toString()).emit(
@@ -112,7 +104,7 @@ function create(socket, paramObj) {
 
             if(
                 locs[0].owner &&
-                socket.request.user.id.toString() !== locOwnerId
+                socket.request.user.id.toString() !== locs[0].owner.toString()
             ) {
                 email.connect(locs[0], {
                     who : socket.request.user.name,
@@ -121,7 +113,7 @@ function create(socket, paramObj) {
                 });
             }
         }).catch(function(err) {
-            socket.emit('info', err.message);
+            socket.emit('error', err.message);
             if(err.location) {
                 return err.location.remove();
             }
@@ -229,7 +221,7 @@ function move(socket, paramObj) {
                     return email.visit(loc, socket.request.user.name);
                 }
             }).catch(function(err) {
-                socket.emit('info', err.message);
+                socket.emit('error', err.message);
             });
     }
 }
@@ -252,14 +244,15 @@ function write(socket, paramObj) {
         socket.location.surface &&              // location has a surface
         socket.location.surface.write           // surface is populated
     ) {
-        socket.broadcast.to(socket.location.id.toString()).emit(
-            'action',
-            `${socket.request.user.name} writes something.`
-        );
-
         socket.location.surface.
             write(socket.request.user.id, paramObj.message).
             then(function() {
+                socket.broadcast.to(socket.location.id.toString()).emit(
+                    'action',
+                    `${socket.request.user.name} writes something.`
+                );
+                socket.emit('write', true);
+
                 Location.
                     findPopulated(socket.location.id).
                     then(function(loc) {
