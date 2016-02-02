@@ -24,6 +24,10 @@ function confirmEmail(socket, paramObj) {
     //  Params:
     //      code: String
 
+    if(!socket.request.user.logged_in) {
+        return;
+    }
+
     try {
         socket.request.user.
             confirmEmail(paramObj.code).
@@ -48,6 +52,9 @@ function connect(socket, paramObj) {
             return socket.location[methodName](targetLoc);
         }).then(function(locs) {
             let dir = dirName(paramObj.direction);
+            let oppDir = directionNames[
+                (directionNames.indexOf(dir) + 2) % directionNames.length
+            ];
 
             socket.emit('connect', true);
             look(socket);
@@ -55,6 +62,10 @@ function connect(socket, paramObj) {
             socket.broadcast.to(locs[0].id.toString()).emit(
                 'action',
                 `${socket.request.user.name} connects a new location to the ${dir}.`
+            );
+            socket.broadcast.to(locs[0].id.toString()).emit(
+                'action',
+                `A bridge forms to the ${oppDir}.`
             );
 
             if(
@@ -71,7 +82,7 @@ function connect(socket, paramObj) {
             socket.emit('error', err.message);
         });
     } else {
-        socket.emit('info', "Only registered users can connect locations.");
+        socket.emit('info', "Explorers explore, creators create.");
     }
 }
 function create(socket, paramObj) {
@@ -119,7 +130,7 @@ function create(socket, paramObj) {
             }
         });
     } else {
-        socket.emit('info', "Only registered users can create locations.");
+        socket.emit('info', "Explorers explore, creators create.");
     }
 }
 function jump(socket, paramObj) {
@@ -127,6 +138,7 @@ function jump(socket, paramObj) {
     //      index: 0 <= i < |user.locations|
 
     if(
+        socket.request.user.logged_in &&
         Number.isFinite(paramObj.index) &&
         paramObj.index >= 0 &&
         paramObj.index < socket.request.user.locations.length
@@ -195,9 +207,17 @@ function move(socket, paramObj) {
                     (directionNames.indexOf(dir) + 2) % directionNames.length
                 ];
 
+                let name;
+                if(socket.request.user.logged_in) {
+                    name = socket.request.user.name;
+                } else {
+                    name = "A stranger";
+                }
+
+
                 socket.broadcast.to(oldLocId).emit(
                     'travel',
-                    `${socket.request.user.name} leaves to the ${dir}.`
+                    `${name} leaves to the ${dir}.`
                 );
                 socket.leave(oldLocId);
 
@@ -206,7 +226,7 @@ function move(socket, paramObj) {
                 socket.join(newLocId);
                 socket.broadcast.to(newLocId).emit(
                     'travel',
-                    `${socket.request.user.name} arrives from the ${oppDir}.`
+                    `${name} arrives from the ${oppDir}.`
                 );
 
                 // socket.emit('moved', true);
@@ -216,9 +236,10 @@ function move(socket, paramObj) {
 
                 if(
                     loc.owner &&
+                    socket.request.user.logged_in &&
                     loc.owner.toString() !== socket.request.user.id.toString()
                 ) {
-                    return email.visit(loc, socket.request.user.name);
+                    return email.visit(loc, name);
                 }
             }).catch(function(err) {
                 socket.emit('error', err.message);
@@ -229,10 +250,14 @@ function say(socket, paramObj) {
     //  Params:
     //      message: String
 
-    io.sockets.to(socket.location.id.toString()).emit('speech', {
-        from : socket.request.user.name,
-        message : paramObj.message
-    });
+    if(socket.request.user.logged_in) {
+        io.sockets.to(socket.location.id.toString()).emit('speech', {
+            from : socket.request.user.name,
+            message : paramObj.message
+        });
+    } else {
+        socket.emit('info', "Explorers have no voice.");
+    }
 }
 function write(socket, paramObj) {
     //  Params:
@@ -268,7 +293,7 @@ function write(socket, paramObj) {
             });
         }
     } else {
-        socket.emit('info', "There's nothing to write on here.");
+        socket.emit('info', "The circumstances do not enable you to write.");
     }
 }
 function processCommand(socket, cmd) {
