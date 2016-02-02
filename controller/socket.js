@@ -52,9 +52,14 @@ function connect(socket, paramObj) {
 
             socket.emit(
                 'info',
-                "You attach a location to the " + dir + "."
+                `You attach a location to the ${dir}.`
             );
             look(socket);
+
+            socket.broadcast.to(locs[0].id.toString()).emit(
+                'action',
+                `${socket.request.user.name} creates a new location to the ${dir}.`
+            );
 
             if(
                 locs[0].owner &&
@@ -96,9 +101,14 @@ function create(socket, paramObj) {
 
             socket.emit(
                 'info',
-                "You create a new location to the " + dir + "."
+                `You create a new location to the ${dir}.`
             );
             look(socket);
+
+            socket.broadcast.to(locs[0].id.toString()).emit(
+                'action',
+                `${socket.request.user.name} creates a new location to the ${dir}.`
+            );
 
             if(
                 locs[0].owner &&
@@ -209,7 +219,7 @@ function move(socket, paramObj) {
 
                 // socket.emit('moved', true);
 
-                socket.emit('travel', "You move " + dir + ".");
+                socket.emit('travel', `You move ${dir}.`);
                 look(socket);
 
                 if(
