@@ -2,8 +2,8 @@
 
 const Location = require('../models').model('Location');
 const email = require('../lib/emails');
-const direction = ['n', 'e', 'w', 's'];
-const directionNames = ['north', 'east', 'west', 'south'];
+const direction = ['n', 'e', 's', 'w'];
+const directionNames = ['north', 'east', 'south', 'west'];
 const filteredAttrs = [
     '__v', '_id', 'random', 'owner',
     'name', 'description', 'surface'
@@ -60,9 +60,6 @@ function connect(socket, paramObj) {
                 locs[0].owner &&
                 socket.request.user.id.toString() !== locOwnerId
             ) {
-                io.sockets.to(locOwnerId).emit('notification', {
-                    message : `Someone has connected to ${locs[1].name}!`
-                });
                 email.connect(locs[0], {
                     who : socket.request.user.name,
                     exit : dir,
@@ -135,10 +132,24 @@ function jump(socket, paramObj) {
         Location.
             findPopulated(socket.request.user.locations[paramObj.index]).
             then(function(targetLoc) {
-                socket.leave(socket.location.id.toString());
+                let oldLocId = socket.location.id.toString();
+                let newLocId = targetLoc.id.toString();
+
+                socket.broadcast.to(oldLocId).emit(
+                    'travel',
+                    `${socket.request.user.name} jumps away.`
+                );
+                socket.leave(oldLocId);
+
                 socket.location = targetLoc;
-                socket.join(targetLoc.id.toString());
-                socket.emit('info', "You jump to one of the locations you created.");
+
+                socket.join(newLocId);
+                socket.broadcast.to(newLocId).emit(
+                    'travel',
+                    `${socket.request.user.name} descends from above.`
+                );
+
+                socket.emit('travel', "You jump to one of the locations you created.");
                 look(socket);
             });
     } else {
@@ -178,9 +189,12 @@ function move(socket, paramObj) {
                 let oldLocId = socket.location.id.toString();
                 let newLocId = loc.id.toString();
                 let dir = dirName(paramObj.direction);
+                let oppDir = directionNames[
+                    (directionNames.indexOf(dir) + 2) % directionNames.length
+                ];
 
-                io.sockets.to(oldLocId).emit(
-                    'info',
+                socket.broadcast.to(oldLocId).emit(
+                    'travel',
                     `${socket.request.user.name} leaves to the ${dir}.`
                 );
                 socket.leave(oldLocId);
@@ -188,14 +202,14 @@ function move(socket, paramObj) {
                 socket.location = loc;
 
                 socket.join(newLocId);
-                io.sockets.to(newLocId).emit(
-                    'info',
-                    `${socket.request.user.name} arrives from the ${dir[directionNames.indexOf(dir) + 2 % directionNames.length]}.`
+                socket.broadcast.to(newLocId).emit(
+                    'travel',
+                    `${socket.request.user.name} arrives from the ${oppDir}.`
                 );
 
                 // socket.emit('moved', true);
 
-                socket.emit('info', "You move " + dir + ".");
+                socket.emit('travel', "You move " + dir + ".");
                 look(socket);
 
                 if(
