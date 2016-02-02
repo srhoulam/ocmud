@@ -73,12 +73,12 @@ function connect(socket, paramObj) {
 function create(socket, paramObj) {
     //  Params:
     //      direction: 'n'/'e'/'w'/'s'
-    //      desc: String
+    //      description: String
 
     if(socket.request.user.logged_in) {
         Location.create({
             owner : socket.request.user.id,
-            description : paramObj.desc || undefined
+            description : paramObj.description || undefined
         }).then(function(newLoc) {
             const methodName = 'attach' + capInitial(dirName(paramObj.direction));
             var attachPromise = socket.location[methodName](newLoc);
