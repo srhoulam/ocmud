@@ -18,10 +18,9 @@ function capInitial(str) {
 }
 
 //  Command handlers
-function confirmEmail(socket, params) {
-    const paramObj = {
-        code : params[0]
-    };
+function confirmEmail(socket, paramObj) {
+    //  Params:
+    //      code: String
 
     try {
         socket.request.user.
@@ -35,11 +34,10 @@ function confirmEmail(socket, params) {
         socket.emit('info', ex.message);
     }
 }
-function connect(socket, params) {
-    const paramObj = {
-        direction : params[0],
-        index : parseInt(params[1], 10)
-    };
+function connect(socket, paramObj) {
+    //  Params:
+    //      direction: 'n'/'e'/'w'/'s'
+    //      index: 0 <= i < |user.locations|
 
     if(socket.request.user.logged_in) {
         const targetLocID = socket.request.user.locations[paramObj.index];
@@ -72,11 +70,10 @@ function connect(socket, params) {
         socket.emit('info', "Only registered users can connect locations.");
     }
 }
-function create(socket, params) {
-    const paramObj = {
-        direction : params[0],
-        desc : params.slice(1).join(' ')
-    };
+function create(socket, paramObj) {
+    //  Params:
+    //      direction: 'n'/'e'/'w'/'s'
+    //      desc: String
 
     if(socket.request.user.logged_in) {
         Location.create({
@@ -119,10 +116,9 @@ function create(socket, params) {
         socket.emit('info', "Only registered users can create locations.");
     }
 }
-function jump(socket, params) {
-    const paramObj = {
-        index : parseInt(params[0], 10)
-    };
+function jump(socket, paramObj) {
+    //  Params:
+    //      index: 0 <= i < |user.locations|
 
     if(
         Number.isFinite(paramObj.index) &&
@@ -160,16 +156,19 @@ function look(socket) {
         'writings' : writings
     });
 }
-function move(socket, direction) {
-    if(!socket.location.notSelfRef(direction)) {
+function move(socket, paramObj) {
+    //  Params:
+    //      direction: 'n'/'e'/'w'/'s'
+
+    if(!socket.location.notSelfRef(paramObj.direction)) {
         // socket.emit('moved', false);
         socket.emit('info', "There is no exit in that direction.");
     } else {
-        Location.findPopulated(socket.location[direction]).
+        Location.findPopulated(socket.location[paramObj.direction]).
             then(function(loc) {
                 socket.location = loc;
                 // socket.emit('moved', true);
-                socket.emit('info', "You move " + dirName(direction) + ".");
+                socket.emit('info', "You move " + dirName(paramObj.direction) + ".");
                 look(socket);
 
                 if(
@@ -183,10 +182,9 @@ function move(socket, direction) {
             });
     }
 }
-function write(socket, params) {
-    var paramObj = {
-        message : params.join(' ')
-    };
+function write(socket, paramObj) {
+    //  Params:
+    //      message: String
 
     if(
         !(paramObj.message.match(/^\s*$/)) &&   // no blank messages
@@ -216,30 +214,23 @@ function write(socket, params) {
     }
 }
 function processCommand(socket, cmd) {
-    //  turn `cmd` into an object later and `switch` on `cmd.type`
-    //      for easier parameter handling, i.e., no need to split
-    //      or sanitize strings
-    var splitCmd = cmd.replace(/^\s+/, '').split(' ');
-    switch(splitCmd[0]) {
-        case 'n':
-        case 'e':
-        case 'w':
-        case 's':
-            move(socket, splitCmd[0]);
+    switch(cmd.command) {
+        case 'travel':
+            move(socket, cmd);
             break;
         case 'confirm': // for now
         case 'confirmEmail':
-            confirmEmail(socket, splitCmd.slice(1));
+            confirmEmail(socket, cmd);
             break;
         case 'connect':
-            connect(socket, splitCmd.slice(1));
+            connect(socket, cmd);
             break;
         case 'create':
-            create(socket, splitCmd.slice(1));
+            create(socket, cmd);
             break;
         case 'j':
         case 'jump':
-            jump(socket, splitCmd.slice(1));
+            jump(socket, cmd);
             break;
         case 'list':
             socket.emit('info', JSON.stringify(socket.request.user.locations));
@@ -256,7 +247,7 @@ function processCommand(socket, cmd) {
             socket.emit('info', JSON.stringify(socket.request.user));
             break;
         case 'write':
-            write(socket, splitCmd.slice(1));
+            write(socket, cmd);
             break;
         default:
             socket.emit('info', "Unsupported."); // for now
