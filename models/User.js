@@ -11,7 +11,8 @@ let userSchema = new Schema({
     name : {
         type : String,
         required : true,
-        unique : true
+        unique : true,
+        validate : [validator.isAlpha, "Invalid username."]
     },
     digest : String,
     email : {
