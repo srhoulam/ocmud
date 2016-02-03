@@ -43,6 +43,9 @@ app.use(session({
         return uuid.v4({
             rng : uuid.nodeRNG
         });
+    },
+    cookie : {
+        maxAge : 5 * 60 * 1000
     }
 }));
 
