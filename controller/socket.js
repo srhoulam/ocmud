@@ -90,7 +90,7 @@ function connect(socket, paramObj) {
             'action',
             `${socket.request.user.name} connects a new location to the ${dir}.`
         );
-        socket.broadcast.to(locs[0].id.toString()).emit(
+        socket.broadcast.to(locs[1].id.toString()).emit(
             'action',
             `A bridge forms to the ${oppDir}.`
         );
