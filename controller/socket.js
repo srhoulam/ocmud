@@ -23,14 +23,14 @@ function ifLoggedIn(f, socket) {
 
     if(socket.request.user.logged_in) {
         return f(args);
-    } else {
-        switch(true) {
-            // case f === list:
-                // break;
-            default:
-                socket.emit('info', "Only creators may take this action. (Log in.)");
-                break;
-        }
+    }
+
+    switch(true) {
+        // case f === list:
+            // break;
+        default:
+            socket.emit('info', "Only creators may take this action. (Log in.)");
+            break;
     }
 }
 
@@ -38,10 +38,6 @@ function ifLoggedIn(f, socket) {
 function confirmEmail(socket, paramObj) {
     //  Params:
     //      code: String
-
-    if(!socket.request.user.logged_in) {
-        return;
-    }
 
     try {
         socket.request.user.
