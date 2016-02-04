@@ -50,6 +50,12 @@ function ifLoggedIn(f, socket) {
 
     socket.emit('info', message);
 }
+function refreshLocation(socket) {
+    return Location.findPopulated(socket.location.id).
+        then(function(loc) {
+            socket.location = loc;
+        });
+}
 
 //  Command handlers
 function confirmEmail(socket, paramObj) {
@@ -74,7 +80,10 @@ function connect(socket, paramObj) {
     //      index: 0 <= i < |user.locations|
 
     const targetLocID = socket.request.user.locations[paramObj.index];
-    Location.findById(targetLocID).then(function(targetLoc) {
+
+    refreshLocation(socket).then(function() {
+        return Location.findById(targetLocID);
+    }).then(function(targetLoc) {
         const methodName = 'attach' + capInitial(dirName(paramObj.direction));
         return socket.location[methodName](targetLoc);
     }).then(function(locs) {
@@ -114,9 +123,11 @@ function create(socket, paramObj) {
     //      direction: 'n'/'e'/'w'/'s'
     //      description: String
 
-    Location.create({
-        owner : socket.request.user.id,
-        description : paramObj.description || undefined
+    refreshLocation(socket).then(function() {
+        return Location.create({
+            owner : socket.request.user.id,
+            description : paramObj.description || undefined
+        });
     }).then(function(newLoc) {
         const methodName = 'attach' + capInitial(dirName(paramObj.direction));
         let attachPromise = socket.location[methodName](newLoc);
@@ -200,23 +211,25 @@ function list(socket) {
     });
 }
 function look(socket) {
-    let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
-        return filteredAttrs.indexOf(elem) === -1 &&
-            socket.location.notSelfRef(elem);
-    });
-
-    let writings;
-    if(socket.location.surface) {
-        writings = socket.location.surface.writings.map(function(w) {
-            return w.message;
+    refreshLocation(socket).then(function() {
+        let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
+            return filteredAttrs.indexOf(elem) === -1 &&
+                socket.location.notSelfRef(elem);
         });
-    }
 
-    socket.emit('sight', {
-        name : socket.location.name,
-        description : socket.location.description,
-        exits : locFeatures,
-        'writings' : writings
+        let writings;
+        if(socket.location.surface) {
+            writings = socket.location.surface.writings.map(function(w) {
+                return w.message;
+            });
+        }
+
+        socket.emit('sight', {
+            name : socket.location.name,
+            description : socket.location.description,
+            exits : locFeatures,
+            'writings' : writings
+        });
     });
 }
 function move(socket, paramObj) {
