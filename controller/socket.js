@@ -25,14 +25,30 @@ function ifLoggedIn(f, socket) {
         return f(args);
     }
 
+    let message;
     switch(true) {
         case f === connect:
-            socket.emit('info', "Explorers explore, creators create.");
+        case f === create:
+            message = "Explorers explore, creators create.";
+            break;
+        case f === jump:
+            message = "You don't have the energy to jump.";
+            break;
+        case f === list:
+            message = "Explorers look ahead, not behind.";
+            break;
+        case f === say:
+            message = "Explorers have no voice.";
+            break;
+        case f === write:
+            message = "You didn't bring anything to write with.";
             break;
         default:
-            socket.emit('info', "Only creators may take this action. (Log in.)");
+            message = "Only creators may take this action. (Log in.)";
             break;
     }
+
+    socket.emit('info', message);
 }
 
 //  Command handlers
@@ -98,55 +114,50 @@ function create(socket, paramObj) {
     //      direction: 'n'/'e'/'w'/'s'
     //      description: String
 
-    if(socket.request.user.logged_in) {
-        Location.create({
-            owner : socket.request.user.id,
-            description : paramObj.description || undefined
-        }).then(function(newLoc) {
-            const methodName = 'attach' + capInitial(dirName(paramObj.direction));
-            let attachPromise = socket.location[methodName](newLoc);
-            let registerPromise = socket.request.user.addLocation(newLoc);
-            let surfacePromise = newLoc.createSurface();
+    Location.create({
+        owner : socket.request.user.id,
+        description : paramObj.description || undefined
+    }).then(function(newLoc) {
+        const methodName = 'attach' + capInitial(dirName(paramObj.direction));
+        let attachPromise = socket.location[methodName](newLoc);
+        let registerPromise = socket.request.user.addLocation(newLoc);
+        let surfacePromise = newLoc.createSurface();
 
-            return Promise.all([attachPromise, registerPromise, surfacePromise]);
-        }).then(function(created) {
-            let locs = created[0];
-            let dir = dirName(paramObj.direction);
+        return Promise.all([attachPromise, registerPromise, surfacePromise]);
+    }).then(function(created) {
+        let locs = created[0];
+        let dir = dirName(paramObj.direction);
 
-            socket.emit('create', true);
-            look(socket);
+        socket.emit('create', true);
+        look(socket);
 
-            socket.broadcast.to(locs[0].id.toString()).emit(
-                'action',
-                `${socket.request.user.name} creates a new location to the ${dir}.`
-            );
+        socket.broadcast.to(locs[0].id.toString()).emit(
+            'action',
+            `${socket.request.user.name} creates a new location to the ${dir}.`
+        );
 
-            if(
-                locs[0].owner &&
-                socket.request.user.id.toString() !== locs[0].owner.toString()
-            ) {
-                email.connect(locs[0], {
-                    who : socket.request.user.name,
-                    exit : dir,
-                    locName : locs[1].name
-                });
-            }
-        }).catch(function(err) {
-            socket.emit('info', err.message);
-            if(err.location) {
-                return err.location.remove();
-            }
-        });
-    } else {
-        socket.emit('info', "Explorers explore, creators create.");
-    }
+        if(
+            locs[0].owner &&
+            socket.request.user.id.toString() !== locs[0].owner.toString()
+        ) {
+            email.connect(locs[0], {
+                who : socket.request.user.name,
+                exit : dir,
+                locName : locs[1].name
+            });
+        }
+    }).catch(function(err) {
+        socket.emit('info', err.message);
+        if(err.location) {
+            return err.location.remove();
+        }
+    });
 }
 function jump(socket, paramObj) {
     //  Params:
     //      index: 0 <= i < |user.locations|
 
     if(
-        socket.request.user.logged_in &&
         Number.isFinite(paramObj.index) &&
         paramObj.index >= 0 &&
         paramObj.index < socket.request.user.locations.length
@@ -179,13 +190,9 @@ function jump(socket, paramObj) {
     }
 }
 function list(socket) {
-    if(socket.request.user.logged_in) {
-        socket.emit('locations', socket.request.user.locations.map(function(loc) {
-            return loc.name;
-        }));
-    } else {
-        socket.emit('info', "Explorers look ahead, not behind.");
-    }
+    socket.emit('locations', socket.request.user.locations.map(function(loc) {
+        return loc.name;
+    }));
 }
 function look(socket) {
     let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
@@ -267,14 +274,10 @@ function say(socket, paramObj) {
     //  Params:
     //      message: String
 
-    if(socket.request.user.logged_in) {
-        io.sockets.to(socket.location.id.toString()).emit('speech', {
-            from : socket.request.user.name,
-            message : paramObj.message
-        });
-    } else {
-        socket.emit('info', "Explorers have no voice.");
-    }
+    io.sockets.to(socket.location.id.toString()).emit('speech', {
+        from : socket.request.user.name,
+        message : paramObj.message
+    });
 }
 function write(socket, paramObj) {
     //  Params:
@@ -282,7 +285,6 @@ function write(socket, paramObj) {
 
     if(
         !(paramObj.message.match(/^\s*$/)) &&   // no blank messages
-        socket.request.user.logged_in &&
         socket.location.surface &&              // location has a surface
         socket.location.surface.write           // surface is populated
     ) {
