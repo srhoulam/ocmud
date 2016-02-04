@@ -69,9 +69,9 @@ function confirmEmail(socket, paramObj) {
                 socket.emit('emailConfirmed', true);
                 socket.emit('info', "Email successfully confirmed!");
             });
-    } catch(ex) {
+    } catch(error) {
         socket.emit('emailConfirmed', false);
-        socket.emit('info', ex.message);
+        socket.emit('info', error.message);
     }
 }
 function connect(socket, paramObj) {
