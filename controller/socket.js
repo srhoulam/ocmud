@@ -26,8 +26,9 @@ function ifLoggedIn(f, socket) {
     }
 
     switch(true) {
-        // case f === list:
-            // break;
+        case f === connect:
+            socket.emit('info', "Explorers explore, creators create.");
+            break;
         default:
             socket.emit('info', "Only creators may take this action. (Log in.)");
             break;
@@ -56,45 +57,41 @@ function connect(socket, paramObj) {
     //      direction: 'n'/'e'/'w'/'s'
     //      index: 0 <= i < |user.locations|
 
-    if(socket.request.user.logged_in) {
-        const targetLocID = socket.request.user.locations[paramObj.index];
-        Location.findById(targetLocID).then(function(targetLoc) {
-            const methodName = 'attach' + capInitial(dirName(paramObj.direction));
-            return socket.location[methodName](targetLoc);
-        }).then(function(locs) {
-            let dir = dirName(paramObj.direction);
-            let oppDir = directionNames[
-                (directionNames.indexOf(dir) + 2) % directionNames.length
-            ];
+    const targetLocID = socket.request.user.locations[paramObj.index];
+    Location.findById(targetLocID).then(function(targetLoc) {
+        const methodName = 'attach' + capInitial(dirName(paramObj.direction));
+        return socket.location[methodName](targetLoc);
+    }).then(function(locs) {
+        let dir = dirName(paramObj.direction);
+        let oppDir = directionNames[
+            (directionNames.indexOf(dir) + 2) % directionNames.length
+        ];
 
-            socket.emit('connect', true);
-            look(socket);
+        socket.emit('connect', true);
+        look(socket);
 
-            socket.broadcast.to(locs[0].id.toString()).emit(
-                'action',
-                `${socket.request.user.name} connects a new location to the ${dir}.`
-            );
-            socket.broadcast.to(locs[0].id.toString()).emit(
-                'action',
-                `A bridge forms to the ${oppDir}.`
-            );
+        socket.broadcast.to(locs[0].id.toString()).emit(
+            'action',
+            `${socket.request.user.name} connects a new location to the ${dir}.`
+        );
+        socket.broadcast.to(locs[0].id.toString()).emit(
+            'action',
+            `A bridge forms to the ${oppDir}.`
+        );
 
-            if(
-                locs[0].owner &&
-                socket.request.user.id.toString() !== locs[0].owner.toString()
-            ) {
-                email.connect(locs[0], {
-                    who : socket.request.user.name,
-                    exit : dir,
-                    locName : locs[1].name
-                });
-            }
-        }).catch(function(err) {
-            socket.emit('info', err.message);
-        });
-    } else {
-        socket.emit('info', "Explorers explore, creators create.");
-    }
+        if(
+            locs[0].owner &&
+            socket.request.user.id.toString() !== locs[0].owner.toString()
+        ) {
+            email.connect(locs[0], {
+                who : socket.request.user.name,
+                exit : dir,
+                locName : locs[1].name
+            });
+        }
+    }).catch(function(err) {
+        socket.emit('info', err.message);
+    });
 }
 function create(socket, paramObj) {
     //  Params:
@@ -326,7 +323,7 @@ function processCommand(socket, cmd) {
             ifLoggedIn(confirmEmail, socket, cmd);
             break;
         case 'connect':
-            connect(socket, cmd);
+            ifLoggedIn(connect, socket, cmd);
             break;
         case 'create':
             create(socket, cmd);
