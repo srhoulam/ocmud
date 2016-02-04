@@ -275,6 +275,23 @@ function move(socket, paramObj) {
             });
     }
 }
+function resendConfirmEmail(socket) {
+    if(!socket.request.user.emailConfirmed) {
+        socket.request.user.
+            setConfirmCode('email').
+            then(function(user) {
+                return email.confirm(user);
+            }).then(function() {
+                return "A new confirmation email has been sent.";
+            }).catch(function() {
+                return "An error occurred and we were unable to send an email at this time.";
+            }).then(function(message) {
+                socket.emit('info', message);
+            });
+    } else {
+        socket.emit('info', "Your email is already confirmed.");
+    }
+}
 function say(socket, paramObj) {
     //  Params:
     //      message: String
@@ -349,6 +366,9 @@ function processCommand(socket, cmd) {
         case 'quit':
             socket.emit('info', "Bye.");
             socket.disconnect();
+            break;
+        case 'resendEmail':
+            ifLoggedIn(resendConfirmEmail, socket);
             break;
         case 'say':
             ifLoggedIn(say, socket, cmd);
