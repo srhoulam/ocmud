@@ -326,14 +326,14 @@ function processCommand(socket, cmd) {
             ifLoggedIn(connect, socket, cmd);
             break;
         case 'create':
-            create(socket, cmd);
+            ifLoggedIn(create, socket, cmd);
             break;
         case 'j':
         case 'jump':
-            jump(socket, cmd);
+            ifLoggedIn(jump, socket, cmd);
             break;
         case 'list':
-            list(socket);
+            ifLoggedIn(list, socket);
             break;
         case 'look':
             look(socket);
@@ -344,13 +344,13 @@ function processCommand(socket, cmd) {
             socket.disconnect();
             break;
         case 'say':
-            say(socket, cmd);
+            ifLoggedIn(say, socket, cmd);
             break;
         case 'whoami':
             socket.emit('info', socket.request.user.logged_in && socket.request.user.name);
             break;
         case 'write':
-            write(socket, cmd);
+            ifLoggedIn(write, socket, cmd);
             break;
         default:
             socket.emit('info', "Unsupported."); // for now
