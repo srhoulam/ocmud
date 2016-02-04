@@ -22,7 +22,7 @@ function ifLoggedIn(f, socket) {
     let args = Array.prototype.slice.call(arguments, 1);
 
     if(socket.request.user.logged_in) {
-        return f(args);
+        return f.apply(null, args);
     }
 
     let message;
