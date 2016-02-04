@@ -18,6 +18,21 @@ function dirName(dirInitial) {
 function capInitial(str) {
     return str[0].toUpperCase() + str.slice(1);
 }
+function ifLoggedIn(f, socket) {
+    let args = Array.prototype.slice.call(arguments, 1);
+
+    if(socket.request.user.logged_in) {
+        return f(args);
+    } else {
+        switch(true) {
+            // case f === list:
+                // break;
+            default:
+                socket.emit('info', "Only creators may take this action. (Log in.)");
+                break;
+        }
+    }
+}
 
 //  Command handlers
 function confirmEmail(socket, paramObj) {
@@ -37,7 +52,7 @@ function confirmEmail(socket, paramObj) {
             });
     } catch(ex) {
         socket.emit('emailConfirmed', false);
-        socket.emit('error', ex.message);
+        socket.emit('info', ex.message);
     }
 }
 function connect(socket, paramObj) {
@@ -79,7 +94,7 @@ function connect(socket, paramObj) {
                 });
             }
         }).catch(function(err) {
-            socket.emit('error', err.message);
+            socket.emit('info', err.message);
         });
     } else {
         socket.emit('info', "Explorers explore, creators create.");
@@ -124,7 +139,7 @@ function create(socket, paramObj) {
                 });
             }
         }).catch(function(err) {
-            socket.emit('error', err.message);
+            socket.emit('info', err.message);
             if(err.location) {
                 return err.location.remove();
             }
@@ -168,6 +183,15 @@ function jump(socket, paramObj) {
             });
     } else {
         socket.emit('info', "Ha ha. Nice try.");
+    }
+}
+function list(socket) {
+    if(socket.request.user.logged_in) {
+        socket.emit('locations', socket.request.user.locations.map(function(loc) {
+            return loc.name;
+        }));
+    } else {
+        socket.emit('info', "Explorers look ahead, not behind.");
     }
 }
 function look(socket) {
@@ -242,7 +266,7 @@ function move(socket, paramObj) {
                     return email.visit(loc, name);
                 }
             }).catch(function(err) {
-                socket.emit('error', err.message);
+                socket.emit('info', err.message);
             });
     }
 }
@@ -303,7 +327,7 @@ function processCommand(socket, cmd) {
             break;
         case 'confirm': // for now
         case 'confirmEmail':
-            confirmEmail(socket, cmd);
+            ifLoggedIn(confirmEmail, socket, cmd);
             break;
         case 'connect':
             connect(socket, cmd);
@@ -316,7 +340,7 @@ function processCommand(socket, cmd) {
             jump(socket, cmd);
             break;
         case 'list':
-            socket.emit('info', JSON.stringify(socket.request.user.locations));
+            list(socket);
             break;
         case 'look':
             look(socket);
@@ -330,7 +354,7 @@ function processCommand(socket, cmd) {
             say(socket, cmd);
             break;
         case 'whoami':
-            socket.emit('info', JSON.stringify(socket.request.user));
+            socket.emit('info', socket.request.user.logged_in && socket.request.user.name);
             break;
         case 'write':
             write(socket, cmd);
