@@ -190,9 +190,14 @@ function jump(socket, paramObj) {
     }
 }
 function list(socket) {
-    socket.emit('locations', socket.request.user.locations.map(function(loc) {
-        return loc.name;
-    }));
+    Location.populate(socket.request.user, {
+        path : 'locations',
+        model : 'Location'
+    }).then(function(popUser) {
+        socket.emit('locations', popUser.locations.map(function(loc) {
+            return loc.name;
+        }));
+    });
 }
 function look(socket) {
     let locFeatures = Object.keys(socket.location.toObject()).filter(function(elem) {
