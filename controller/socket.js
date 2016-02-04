@@ -263,7 +263,7 @@ function move(socket, paramObj) {
                     socket.request.user.logged_in &&
                     loc.owner.toString() !== socket.request.user.id.toString()
                 ) {
-                    return email.visit(loc, name);
+                    email.visit(loc, name);
                 }
             }).catch(function(err) {
                 socket.emit('info', err.message);
