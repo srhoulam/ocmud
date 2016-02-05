@@ -217,19 +217,33 @@ function look(socket) {
                 socket.location.notSelfRef(elem);
         });
 
-        let writings;
-        if(socket.location.surface) {
-            writings = socket.location.surface.writings.map(function(w) {
-                return w.message;
+        if(socket.location.surface && socket.location.surface.writings.length > 0) {
+            Location.populate(socket.location.surface.writings, {
+                path : 'owner',
+                model : 'User'
+            }).then(function(popWritings) {
+                return popWritings.map(function(w) {
+                    return {
+                        author : w.owner.name,
+                        message : w.message
+                    };
+                });
+            }).then(function(writings) {
+                socket.emit('sight', {
+                    name : socket.location.name,
+                    description : socket.location.description,
+                    exits : locFeatures,
+                    'writings' : writings
+                });
+            });
+        } else {
+            socket.emit('sight', {
+                name : socket.location.name,
+                description : socket.location.description,
+                exits : locFeatures,
+                writings : []
             });
         }
-
-        socket.emit('sight', {
-            name : socket.location.name,
-            description : socket.location.description,
-            exits : locFeatures,
-            'writings' : writings
-        });
     });
 }
 function move(socket, paramObj) {
