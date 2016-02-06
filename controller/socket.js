@@ -193,6 +193,7 @@ function jump(socket, paramObj) {
                     `${socket.request.user.name} descends from above.`
                 );
 
+                socket.emit('travel', true);
                 socket.emit('travel', "You jump to one of the locations you created.");
                 look(socket);
             });
@@ -233,6 +234,7 @@ function look(socket) {
                     name : socket.location.name,
                     description : socket.location.description,
                     exits : locFeatures,
+                    surface : socket.location.surface.name,
                     'writings' : writings
                 });
             });
@@ -241,6 +243,7 @@ function look(socket) {
                 name : socket.location.name,
                 description : socket.location.description,
                 exits : locFeatures,
+                surface : null,
                 writings : []
             });
         }
@@ -287,6 +290,7 @@ function move(socket, paramObj) {
 
                 // socket.emit('moved', true);
 
+                socket.emit('travel', true);
                 socket.emit('travel', `You move ${dir}.`);
                 look(socket);
 
