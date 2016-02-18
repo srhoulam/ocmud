@@ -405,7 +405,7 @@ function processCommand(socket, cmd) {
             ifLoggedIn(say, socket, cmd);
             break;
         case 'whoami':
-            socket.emit('ident', socket.request.user.logged_in && socket.request.user.name);
+            socket.emit('ident', socket.request.user.logged_in && socket.request.user.displayName);
             break;
         case 'write':
             ifLoggedIn(write, socket, cmd);
