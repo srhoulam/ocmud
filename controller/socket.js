@@ -98,11 +98,14 @@ function connect(socket, paramObj) {
         socket.broadcast.to(locs[0].id.toString()).emit(
             'action',
             `${socket.request.user.displayName} connects a new location to the ${dir}.`
-        ).emit('action', true);
+        );
         socket.broadcast.to(locs[1].id.toString()).emit(
             'action',
             `A bridge forms to the ${oppDir}.`
         );
+        //  let occupants know to refresh their view
+        socket.broadcast.to(locs[0].id.toString()).emit('action', true);
+        socket.broadcast.to(locs[1].id.toString()).emit('action', true);
 
         if(
             locs[0].owner &&
@@ -145,7 +148,9 @@ function create(socket, paramObj) {
         socket.broadcast.to(locs[0].id.toString()).emit(
             'action',
             `${socket.request.user.displayName} creates a new location to the ${dir}.`
-        ).emit('action', true);
+        );
+        //  let occupants know to refresh their view
+        socket.broadcast.to(locs[0].id.toString()).emit('action', true);
 
         if(
             locs[0].owner &&
@@ -347,8 +352,10 @@ function write(socket, paramObj) {
                 socket.broadcast.to(socket.location.id.toString()).emit(
                     'action',
                     `${socket.request.user.displayName} writes something.`
-                ).emit('action', true);
+                );
                 socket.emit('write', true);
+                //  let occupants know to refresh their view
+                socket.broadcast.to(socket.location.id.toString()).emit('action', true);
 
                 Location.
                     findPopulated(socket.location.id).
