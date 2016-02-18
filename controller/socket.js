@@ -97,8 +97,8 @@ function connect(socket, paramObj) {
 
         socket.broadcast.to(locs[0].id.toString()).emit(
             'action',
-            `${socket.request.user.name} connects a new location to the ${dir}.`
-        );
+            `${socket.request.user.displayName} connects a new location to the ${dir}.`
+        ).emit('action', true);
         socket.broadcast.to(locs[1].id.toString()).emit(
             'action',
             `A bridge forms to the ${oppDir}.`
@@ -109,7 +109,7 @@ function connect(socket, paramObj) {
             socket.request.user.id.toString() !== locs[0].owner.toString()
         ) {
             email.connect(locs[0], {
-                who : socket.request.user.name,
+                who : socket.request.user.displayName,
                 exit : dir,
                 locName : locs[1].name
             });
@@ -144,15 +144,15 @@ function create(socket, paramObj) {
 
         socket.broadcast.to(locs[0].id.toString()).emit(
             'action',
-            `${socket.request.user.name} creates a new location to the ${dir}.`
-        );
+            `${socket.request.user.displayName} creates a new location to the ${dir}.`
+        ).emit('action', true);
 
         if(
             locs[0].owner &&
             socket.request.user.id.toString() !== locs[0].owner.toString()
         ) {
             email.connect(locs[0], {
-                who : socket.request.user.name,
+                who : socket.request.user.displayName,
                 exit : dir,
                 locName : locs[1].name
             });
@@ -181,7 +181,7 @@ function jump(socket, paramObj) {
 
                 socket.broadcast.to(oldLocId).emit(
                     'travel',
-                    `${socket.request.user.name} jumps away.`
+                    `${socket.request.user.displayName} jumps away.`
                 );
                 socket.leave(oldLocId);
 
@@ -190,7 +190,7 @@ function jump(socket, paramObj) {
                 socket.join(newLocId);
                 socket.broadcast.to(newLocId).emit(
                     'travel',
-                    `${socket.request.user.name} descends from above.`
+                    `${socket.request.user.displayName} descends from above.`
                 );
 
                 socket.emit('travel', true);
@@ -268,7 +268,7 @@ function move(socket, paramObj) {
 
                 let name;
                 if(socket.request.user.logged_in) {
-                    name = socket.request.user.name;
+                    name = socket.request.user.displayName;
                 } else {
                     name = "A stranger";
                 }
@@ -328,7 +328,7 @@ function say(socket, paramObj) {
     //      message: String
 
     io.sockets.to(socket.location.id.toString()).emit('speech', {
-        from : socket.request.user.name,
+        from : socket.request.user.displayName,
         message : paramObj.message
     });
 }
@@ -346,8 +346,8 @@ function write(socket, paramObj) {
             then(function() {
                 socket.broadcast.to(socket.location.id.toString()).emit(
                     'action',
-                    `${socket.request.user.name} writes something.`
-                );
+                    `${socket.request.user.displayName} writes something.`
+                ).emit('action', true);
                 socket.emit('write', true);
 
                 Location.
@@ -361,7 +361,7 @@ function write(socket, paramObj) {
         if(socket.request.user.id.toString() !== socket.location.owner.toString()) {
             email.write(socket.location, {
                 what : paramObj.message,
-                who : socket.request.user.name
+                who : socket.request.user.displayName
             });
         }
     } else {
