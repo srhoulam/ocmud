@@ -212,7 +212,15 @@ function list(socket) {
         model : 'Location'
     }).then(function(popUser) {
         socket.emit('locations', popUser.locations.map(function(loc) {
-            return loc.name;
+            return {
+                name : loc.name,
+                exits: {
+                    n : loc.notSelfRef('n'),
+                    e : loc.notSelfRef('e'),
+                    w : loc.notSelfRef('w'),
+                    s : loc.notSelfRef('s')
+                }
+            };
         }));
     });
 }
