@@ -223,7 +223,7 @@ function look(socket) {
                 socket.location.notSelfRef(elem);
         });
 
-        if(socket.location.surface && socket.location.surface.writings.length > 0) {
+        if(socket.location.surface) {
             Location.populate(socket.location.surface.writings, {
                 path : 'owner',
                 model : 'User'
