@@ -12,6 +12,7 @@ let passport = require('./lib/passport');
 let cors = require('cors');
 
 let app = express();
+let appEnvironment = app.get('env');
 
 /** DOC
  *
@@ -61,7 +62,9 @@ app.use('/auth', require('./routes/auth'));
 //
 //  remove this for production and use a reverse proxy
 //      to serve the files from the same origin as the app
-app.use('/pub', express.static(__dirname + "/../ocmud-fe"));
+if(appEnvironment === 'development') {
+    app.use('/pub', express.static(__dirname + "/../ocmud-fe"));
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -74,7 +77,7 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
+if (appEnvironment === 'development') {
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.json({
