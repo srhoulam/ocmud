@@ -1,0 +1,9 @@
+'use strict';
+
+const router = require('express').Router();
+const ctrl = require('../controller/express');
+
+router.route('/').
+    post(ctrl.bug);
+
+module.exports = router;
