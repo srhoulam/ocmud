@@ -14,6 +14,11 @@ let cors = require('cors');
 let app = express();
 let appEnvironment = app.get('env');
 
+//  will be using a reverse proxy in production
+if(appEnvironment !== 'development') {
+    app.enable("trust proxy");
+}
+
 /** DOC
  *
  *  The purpose of the express portion of this application
@@ -32,11 +37,12 @@ app.use(cors({
     credentials : true
 }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+//  app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(session({
     name : "ocmud.sid",
     secret : process.env.SESSION_SECRET,
+    secure : appEnvironment !== 'development',
     store : sessionStore,
     saveUninitialized : false,
     resave : false,
@@ -46,7 +52,7 @@ app.use(session({
         });
     },
     cookie : {
-        maxAge : 5 * 60 * 1000
+        maxAge : 60 * 60 * 1000
     }
 }));
 
