@@ -56,6 +56,7 @@ app.use(passport.session());
 
 // routers
 app.use('/auth', require('./routes/auth'));
+app.use('/bug', require('./routes/bug'));
 
 //  serve front-end from same origin
 //      socket.io won't send the session cookie otherwise
