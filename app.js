@@ -2,7 +2,6 @@
 
 let express = require('express');
 //let path = require('path');
-let logger = require('morgan');
 let bodyParser = require('body-parser');
 
 let session = require('express-session');
@@ -31,7 +30,6 @@ if(appEnvironment !== 'development') {
 process.env.SESSION_SECRET || require('dotenv').load();
 
 // apply middleware to express instance
-app.use(logger(app.get('env') === 'development' ? 'dev' : 'combined'));
 app.use(cors({
     origin : 'https://pfbe.saad.rhoulam.com',
     credentials : true

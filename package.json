@@ -31,7 +31,6 @@
     "mongoose-random": "^0.1.1",
     "mongoose-selfreference": "^1.0.0",
     "mongoose-unique-validator": "^0.6.2",
-    "morgan": "^1.6.1",
     "nodemailer": "^2.0.0",
     "passport": "^0.3.2",
     "passport-local-register": "^1.0.2",
