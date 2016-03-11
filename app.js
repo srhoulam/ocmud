@@ -33,7 +33,7 @@ process.env.SESSION_SECRET || require('dotenv').load();
 // apply middleware to express instance
 app.use(logger(app.get('env') === 'development' ? 'dev' : 'combined'));
 app.use(cors({
-    origin : 'pfbe.saad.rhoulam.com', // for now
+    origin : 'https://pfbe.saad.rhoulam.com',
     credentials : true
 }));
 app.use(bodyParser.json());
